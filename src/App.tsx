@@ -670,9 +670,6 @@ const PremiumFooter = () => {
         
         {/* Backend - Moves Left */}
         <div className="relative flex flex-col items-start w-full group">
-          <div className="hidden lg:block z-10 mb-5 mx-4 sm:mx-6 px-4 py-2 liquid-glass rounded-full">
-            <span className="text-white/50 text-xs tracking-widest uppercase">Backend</span>
-          </div>
           <div className="flex overflow-hidden w-full" style={{ maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)' }}>
             <motion.div 
               className="flex gap-10 sm:gap-12 lg:gap-14 items-center min-w-max pr-10 sm:pr-12 lg:pr-14"
@@ -691,9 +688,6 @@ const PremiumFooter = () => {
 
         {/* Frontend - Moves Right */}
         <div className="relative flex flex-col items-start w-full group">
-          <div className="hidden lg:block z-10 mb-5 mx-4 sm:mx-6 px-4 py-2 liquid-glass rounded-full">
-            <span className="text-white/50 text-xs tracking-widest uppercase">Frontend</span>
-          </div>
           <div className="flex overflow-hidden w-full" style={{ maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)' }}>
             <motion.div 
               className="flex gap-10 sm:gap-12 lg:gap-14 items-center min-w-max pr-10 sm:pr-12 lg:pr-14"
