@@ -63,7 +63,8 @@ type BrandIconProps = SVGProps<SVGSVGElement>;
 type Tech = {
   name: string;
   slug?: string;
-  mark?: 'aws';
+  mark?: 'aws' | 'badge';
+  initials?: string;
 };
 
 const Instagram = (props: BrandIconProps) => (
@@ -115,6 +116,17 @@ const TechLogo = ({ tech, className }: { tech: Tech; className: string }) => {
     );
   }
 
+  if (tech.mark === 'badge') {
+    return (
+      <svg viewBox="0 0 64 64" aria-label={tech.name} className={className}>
+        <rect x="5" y="5" width="54" height="54" rx="15" fill="none" stroke="currentColor" strokeWidth="4" />
+        <text x="32" y="39" textAnchor="middle" fill="currentColor" fontSize={tech.initials && tech.initials.length > 2 ? "17" : "22"} fontWeight="800" fontFamily="Arial, sans-serif">
+          {tech.initials}
+        </text>
+      </svg>
+    );
+  }
+
   return <img src={`https://cdn.simpleicons.org/${tech.slug}/white`} alt={tech.name} className={className} />;
 };
 
@@ -134,27 +146,21 @@ const HeroSection = () => {
         if (!startTimestamp) startTimestamp = timestamp;
         const progress = Math.min((timestamp - startTimestamp) / duration, 1);
         video.style.opacity = String(start + progress * (end - start));
-        if (progress < 1) {
-          fadeAnimation = window.requestAnimationFrame(step);
-        } else if (callback) {
-          callback();
-        }
+        if (progress < 1) fadeAnimation = window.requestAnimationFrame(step);
+        else if (callback) callback();
       };
       fadeAnimation = window.requestAnimationFrame(step);
     };
 
     const handleCanPlay = () => {
       if (fadeState.current !== 'idle' && fadeState.current !== 'fadingOut') return;
-      video.play().catch((e: unknown) => console.log("Auto-play prevented", e));
+      video.play().catch(() => undefined);
       fadeState.current = 'fadingIn';
-      animateOpacity(0, 1, 500, () => {
-        fadeState.current = 'idle';
-      });
+      animateOpacity(0, 1, 500, () => { fadeState.current = 'idle'; });
     };
 
     const handleTimeUpdate = () => {
-      const remainingTime = video.duration - video.currentTime;
-      if (remainingTime <= 0.55 && fadeState.current === 'idle') {
+      if (video.duration - video.currentTime <= 0.55 && fadeState.current === 'idle') {
         fadeState.current = 'fadingOut';
         animateOpacity(1, 0, 500);
       }
@@ -162,13 +168,11 @@ const HeroSection = () => {
 
     const handleEnded = () => {
       video.style.opacity = '0';
-      setTimeout(() => {
+      window.setTimeout(() => {
         video.currentTime = 0;
-        video.play().catch((e: unknown) => console.log("Play prevented", e));
+        video.play().catch(() => undefined);
         fadeState.current = 'fadingIn';
-        animateOpacity(0, 1, 500, () => {
-          fadeState.current = 'idle';
-        });
+        animateOpacity(0, 1, 500, () => { fadeState.current = 'idle'; });
       }, 100);
     };
 
@@ -471,8 +475,9 @@ const ClientReviewsSection = () => {
     quote: string;
     client: string;
     role: string;
-    metric: string;
-    label: string;
+    date: string;
+    project: string;
+    rating: number;
   }>(null);
 
   const reviews = [
@@ -480,22 +485,25 @@ const ClientReviewsSection = () => {
       quote: "NxtGen turned a messy product idea into a polished platform that felt fast, premium, and ready for real users.",
       client: "Arielle Santos",
       role: "Founder, LaunchPad Studio",
-      metric: "3.8x",
-      label: "faster launch"
+      date: "2 weeks ago",
+      project: "Product strategy & web platform",
+      rating: 5
     },
     {
       quote: "The team understood both engineering and brand experience. Every page, flow, and interaction felt intentional.",
       client: "Marco Reyes",
       role: "Operations Lead, Northline",
-      metric: "92%",
-      label: "workflow clarity"
+      date: "1 month ago",
+      project: "Operations platform",
+      rating: 5
     },
     {
       quote: "They gave our digital presence the kind of futuristic edge we wanted without making it hard to use.",
       client: "Danica Cruz",
       role: "Creative Director, Signal Haus",
-      metric: "24/7",
-      label: "stable rollout"
+      date: "2 months ago",
+      project: "Brand experience & website",
+      rating: 5
     }
   ];
 
@@ -530,18 +538,23 @@ const ClientReviewsSection = () => {
                   onClick={() => setSelectedReview(review)}
                   className="liquid-glass rounded-3xl p-6 sm:p-7 w-[82vw] sm:w-[410px] lg:w-[450px] min-h-[320px] flex flex-col justify-between relative text-left hover:bg-white/[0.03] transition-colors"
                 >
-                  <div className="absolute top-5 right-5 text-white/10 text-5xl font-['Instrument_Serif']">"</div>
                   <div>
-                    <div className="mb-8 flex items-baseline gap-3">
-                      <span className="text-4xl sm:text-5xl font-bold text-white">{review.metric}</span>
-                      <span className="text-xs uppercase tracking-[0.22em] text-white/35">{review.label}</span>
+                    <div className="flex items-center justify-between gap-4 mb-6">
+                      <div className="flex items-center gap-1 text-[#fbbc04]" aria-label={`${review.rating} out of 5 stars`}>
+                        {Array.from({ length: review.rating }, (_, star) => <span key={star} className="text-lg leading-none">★</span>)}
+                      </div>
+                      <span className="text-white/35 text-xs">{review.date}</span>
+                    </div>
+                    <div className="flex items-center gap-2 mb-5">
+                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white text-black text-xs font-bold">G</span>
+                      <span className="text-white/45 text-xs uppercase tracking-[0.18em]">Google review</span>
                     </div>
                     <p className="text-white/75 text-base leading-relaxed">"{review.quote}"</p>
                   </div>
                   <div className="mt-10 pt-5 border-t border-white/10">
                     <p className="text-white font-medium">{review.client}</p>
                     <p className="text-white/40 text-sm mt-1">{review.role}</p>
-                    <p className="text-white/30 text-xs uppercase tracking-[0.18em] mt-5">View review</p>
+                    <p className="text-white/30 text-xs uppercase tracking-[0.18em] mt-5">{review.project} · View review</p>
                   </div>
                 </button>
               ))}
@@ -575,15 +588,18 @@ const ClientReviewsSection = () => {
               </button>
               <div className="pr-20">
                 <p className="text-white/35 text-xs uppercase tracking-[0.24em] mb-4">Client Review</p>
-                <div className="mb-8 flex items-baseline gap-3">
-                  <span className="text-5xl sm:text-6xl font-bold text-white">{selectedReview.metric}</span>
-                  <span className="text-xs uppercase tracking-[0.22em] text-white/35">{selectedReview.label}</span>
+                 <div className="flex flex-wrap items-center gap-4 mb-8">
+                   <div className="flex items-center gap-1 text-[#fbbc04]" aria-label={`${selectedReview.rating} out of 5 stars`}>
+                     {Array.from({ length: selectedReview.rating }, (_, star) => <span key={star} className="text-xl leading-none">★</span>)}
+                   </div>
+                   <span className="text-white/35 text-sm">{selectedReview.date}</span>
                 </div>
               </div>
               <p className="text-2xl sm:text-3xl font-['Instrument_Serif'] leading-tight text-white">"{selectedReview.quote}"</p>
               <div className="mt-10 pt-6 border-t border-white/10">
                 <p className="text-white font-medium">{selectedReview.client}</p>
                 <p className="text-white/40 text-sm mt-1">{selectedReview.role}</p>
+                 <p className="text-white/35 text-xs uppercase tracking-[0.18em] mt-4">{selectedReview.project} · Google review</p>
               </div>
             </motion.div>
           </motion.div>
@@ -630,10 +646,10 @@ const PremiumFooter = () => {
   ];
 
   const designerTech: Tech[] = [
-    { name: "Figma", slug: "figma" }, { name: "Canva", slug: "canva" },
-    { name: "Photoshop", slug: "adobephotoshop" }, { name: "Illustrator", slug: "adobeillustrator" },
-    { name: "After Effects", slug: "adobeaftereffects" }, { name: "Premiere Pro", slug: "adobepremierepro" },
-    { name: "DaVinci Resolve", slug: "davinciresolve" }, { name: "CapCut", slug: "capcut" },
+    { name: "Figma", slug: "figma" }, { name: "Canva", mark: "badge", initials: "C" },
+    { name: "Photoshop", mark: "badge", initials: "Ps" }, { name: "Illustrator", mark: "badge", initials: "Ai" },
+    { name: "After Effects", mark: "badge", initials: "Ae" }, { name: "Premiere Pro", mark: "badge", initials: "Pr" },
+    { name: "DaVinci Resolve", slug: "davinciresolve" }, { name: "CapCut", mark: "badge", initials: "CC" },
     { name: "Blender", slug: "blender" }
   ];
 
