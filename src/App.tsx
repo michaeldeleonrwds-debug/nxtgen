@@ -467,6 +467,13 @@ const ServicesSection = () => {
 const ClientReviewsSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [selectedReview, setSelectedReview] = useState<null | {
+    quote: string;
+    client: string;
+    role: string;
+    metric: string;
+    label: string;
+  }>(null);
 
   const reviews = [
     {
@@ -507,36 +514,81 @@ const ClientReviewsSection = () => {
               Built for teams that move next.
             </h2>
           </div>
-          <p className="text-white/50 text-sm sm:text-base leading-relaxed max-w-md">
-            Sample client feedback placeholders for now, styled to match the NxtGen launch experience.
-          </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-          {reviews.map((review, idx) => (
-            <motion.article
-              key={review.client}
-              initial={{ opacity: 0, y: 36 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 36 }}
-              transition={{ duration: 0.7, delay: idx * 0.12 }}
-              className="liquid-glass rounded-3xl p-6 sm:p-7 min-h-[320px] flex flex-col justify-between relative"
+        <div className="relative -mx-4 sm:-mx-6">
+          <div className="flex overflow-hidden" style={{ maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)' }}>
+            <motion.div
+              className="flex gap-5 sm:gap-6 min-w-max pr-5 sm:pr-6"
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{ repeat: Infinity, ease: "linear", duration: 36 }}
             >
-              <div className="absolute top-5 right-5 text-white/10 text-5xl font-['Instrument_Serif']">"</div>
-              <div>
-                <div className="mb-8 flex items-baseline gap-3">
-                  <span className="text-4xl sm:text-5xl font-bold text-white">{review.metric}</span>
-                  <span className="text-xs uppercase tracking-[0.22em] text-white/35">{review.label}</span>
-                </div>
-                <p className="text-white/75 text-base leading-relaxed">"{review.quote}"</p>
-              </div>
-              <div className="mt-10 pt-5 border-t border-white/10">
-                <p className="text-white font-medium">{review.client}</p>
-                <p className="text-white/40 text-sm mt-1">{review.role}</p>
-              </div>
-            </motion.article>
-          ))}
+              {[...reviews, ...reviews].map((review, idx) => (
+                <button
+                  key={`${review.client}-${idx}`}
+                  type="button"
+                  onClick={() => setSelectedReview(review)}
+                  className="liquid-glass rounded-3xl p-6 sm:p-7 w-[82vw] sm:w-[410px] lg:w-[450px] min-h-[320px] flex flex-col justify-between relative text-left hover:bg-white/[0.03] transition-colors"
+                >
+                  <div className="absolute top-5 right-5 text-white/10 text-5xl font-['Instrument_Serif']">"</div>
+                  <div>
+                    <div className="mb-8 flex items-baseline gap-3">
+                      <span className="text-4xl sm:text-5xl font-bold text-white">{review.metric}</span>
+                      <span className="text-xs uppercase tracking-[0.22em] text-white/35">{review.label}</span>
+                    </div>
+                    <p className="text-white/75 text-base leading-relaxed">"{review.quote}"</p>
+                  </div>
+                  <div className="mt-10 pt-5 border-t border-white/10">
+                    <p className="text-white font-medium">{review.client}</p>
+                    <p className="text-white/40 text-sm mt-1">{review.role}</p>
+                    <p className="text-white/30 text-xs uppercase tracking-[0.18em] mt-5">View review</p>
+                  </div>
+                </button>
+              ))}
+            </motion.div>
+          </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {selectedReview && (
+          <motion.div
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedReview(null)}
+          >
+            <motion.div
+              className="liquid-glass rounded-3xl max-w-2xl w-full p-6 sm:p-9 relative"
+              initial={{ opacity: 0, y: 24, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 24, scale: 0.96 }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => setSelectedReview(null)}
+                className="absolute right-5 top-5 rounded-full border border-white/10 px-3 py-1 text-sm text-white/60 hover:text-white hover:bg-white/5"
+              >
+                Close
+              </button>
+              <div className="pr-20">
+                <p className="text-white/35 text-xs uppercase tracking-[0.24em] mb-4">Client Review</p>
+                <div className="mb-8 flex items-baseline gap-3">
+                  <span className="text-5xl sm:text-6xl font-bold text-white">{selectedReview.metric}</span>
+                  <span className="text-xs uppercase tracking-[0.22em] text-white/35">{selectedReview.label}</span>
+                </div>
+              </div>
+              <p className="text-2xl sm:text-3xl font-['Instrument_Serif'] leading-tight text-white">"{selectedReview.quote}"</p>
+              <div className="mt-10 pt-6 border-t border-white/10">
+                <p className="text-white font-medium">{selectedReview.client}</p>
+                <p className="text-white/40 text-sm mt-1">{selectedReview.role}</p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };
@@ -574,7 +626,15 @@ const PremiumFooter = () => {
     { name: "Vue", slug: "vuedotjs" }, { name: "JavaScript", slug: "javascript" },
     { name: "TypeScript", slug: "typescript" }, { name: "Tailwind CSS", slug: "tailwindcss" },
     { name: "HTML5", slug: "html5" }, { name: "Vite", slug: "vite" },
-    { name: "Figma", slug: "figma" }
+    { name: "Flutter", slug: "flutter" }
+  ];
+
+  const designerTech: Tech[] = [
+    { name: "Figma", slug: "figma" }, { name: "Canva", slug: "canva" },
+    { name: "Photoshop", slug: "adobephotoshop" }, { name: "Illustrator", slug: "adobeillustrator" },
+    { name: "After Effects", slug: "adobeaftereffects" }, { name: "Premiere Pro", slug: "adobepremierepro" },
+    { name: "DaVinci Resolve", slug: "davinciresolve" }, { name: "CapCut", slug: "capcut" },
+    { name: "Blender", slug: "blender" }
   ];
 
   const infraTech: Tech[] = [
@@ -703,6 +763,24 @@ const PremiumFooter = () => {
             </motion.div>
           </div>
         </div>
+
+        {/* Designer & Video Tools - Moves Left */}
+        <div className="relative flex flex-col items-start w-full group">
+          <div className="flex overflow-hidden w-full" style={{ maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)' }}>
+            <motion.div 
+              className="flex gap-10 sm:gap-12 lg:gap-14 items-center min-w-max pr-10 sm:pr-12 lg:pr-14"
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{ repeat: Infinity, ease: "linear", duration: 40 }}
+            >
+              {[...designerTech, ...designerTech].map((tech, i) => (
+                <div key={i} className="flex items-center gap-4 sm:gap-5 text-white/50 hover:text-white transition-colors duration-500">
+                  <TechLogo tech={tech} className="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 opacity-80 group-hover:opacity-100 transition-opacity text-white" />
+                  <span className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight">{tech.name}</span>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+        </div>
       </div>
 
       {/* Engineering Team Grid */}
@@ -810,7 +888,6 @@ const PremiumFooter = () => {
             />
           </label>
           <div className="mt-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <p className="text-xs leading-relaxed text-white/35">Placeholder form for now. Connect this to email or a backend when ready.</p>
             <button type="submit" className="rounded-full bg-white px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-white/90">
               Send Message
             </button>
