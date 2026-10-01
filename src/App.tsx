@@ -9,6 +9,7 @@ import webMobileImage from './assets/web-mobile.webp';
 import cmsNoCodeImage from './assets/CMS & No code.webp';
 import arduinoIotImage from './assets/Arduino & Iot.webp';
 import designBrandingImage from './assets/Design and Branding.webp';
+import siteLogo from './assets/sitelogo.webp';
 
 const globalCss = `
   @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
@@ -200,8 +201,7 @@ const HeroSection = () => {
       <nav className="relative z-20 px-4 sm:px-6 py-4 sm:py-6 w-full">
         <div className="liquid-glass rounded-2xl sm:rounded-full max-w-5xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center gap-3">
           <div className="flex items-center min-w-0">
-            <Globe className="w-5 h-5 sm:w-6 sm:h-6 text-white shrink-0" />
-            <span className="text-white font-semibold text-base sm:text-lg ml-2 truncate">NxtGen</span>
+            <img src={siteLogo} alt="NxtGen" className="h-7 sm:h-8 w-auto shrink-0" />
             <div className="hidden md:flex gap-8 ml-8">
               {['Features', 'Services', 'About'].map((item) => (
                 <a key={item} href={`#${item.toLowerCase()}`} className="text-white/80 hover:text-white text-sm font-medium transition-colors">
@@ -224,17 +224,6 @@ const HeroSection = () => {
           Build what's <em className="italic font-['Instrument_Serif']">next</em>.
         </h1>
         
-        <div className="max-w-xl w-full liquid-glass rounded-full pl-5 sm:pl-6 pr-2 py-2 flex items-center gap-3">
-          <input 
-            type="email" 
-            placeholder="Enter your email" 
-            className="flex-1 min-w-0 bg-transparent border-none outline-none text-white placeholder:text-white/40"
-          />
-          <a href="#contact-form" aria-label="Go to contact" className="bg-white rounded-full p-3 text-black hover:bg-white/90 transition-colors">
-            <ArrowRight className="w-5 h-5" />
-          </a>
-        </div>
-
         <p className="text-white text-sm leading-relaxed px-1 sm:px-4 max-w-lg mt-6">
           Transforming ideas into scalable digital realities. We specialize in custom software, web apps, mobile solutions, and cutting-edge engineering.
         </p>
@@ -468,6 +457,83 @@ const ServicesSection = () => {
                 <p className="text-white/50 text-sm leading-relaxed">{card.description}</p>
               </div>
             </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const ClientReviewsSection = () => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  const reviews = [
+    {
+      quote: "NxtGen turned a messy product idea into a polished platform that felt fast, premium, and ready for real users.",
+      client: "Arielle Santos",
+      role: "Founder, LaunchPad Studio",
+      metric: "3.8x",
+      label: "faster launch"
+    },
+    {
+      quote: "The team understood both engineering and brand experience. Every page, flow, and interaction felt intentional.",
+      client: "Marco Reyes",
+      role: "Operations Lead, Northline",
+      metric: "92%",
+      label: "workflow clarity"
+    },
+    {
+      quote: "They gave our digital presence the kind of futuristic edge we wanted without making it hard to use.",
+      client: "Danica Cruz",
+      role: "Creative Director, Signal Haus",
+      metric: "24/7",
+      label: "stable rollout"
+    }
+  ];
+
+  return (
+    <section ref={ref} className="bg-black py-20 sm:py-28 lg:py-36 px-4 sm:px-6 overflow-hidden">
+      <div className="max-w-7xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+          transition={{ duration: 0.7 }}
+          className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 sm:mb-14"
+        >
+          <div>
+            <p className="text-white/35 text-xs tracking-[0.28em] uppercase mb-4">Client Reviews</p>
+            <h2 className="text-4xl sm:text-5xl lg:text-7xl text-white tracking-tight leading-none">
+              Built for teams that move next.
+            </h2>
+          </div>
+          <p className="text-white/50 text-sm sm:text-base leading-relaxed max-w-md">
+            Sample client feedback placeholders for now, styled to match the NxtGen launch experience.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+          {reviews.map((review, idx) => (
+            <motion.article
+              key={review.client}
+              initial={{ opacity: 0, y: 36 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 36 }}
+              transition={{ duration: 0.7, delay: idx * 0.12 }}
+              className="liquid-glass rounded-3xl p-6 sm:p-7 min-h-[320px] flex flex-col justify-between relative"
+            >
+              <div className="absolute top-5 right-5 text-white/10 text-5xl font-['Instrument_Serif']">"</div>
+              <div>
+                <div className="mb-8 flex items-baseline gap-3">
+                  <span className="text-4xl sm:text-5xl font-bold text-white">{review.metric}</span>
+                  <span className="text-xs uppercase tracking-[0.22em] text-white/35">{review.label}</span>
+                </div>
+                <p className="text-white/75 text-base leading-relaxed">"{review.quote}"</p>
+              </div>
+              <div className="mt-10 pt-5 border-t border-white/10">
+                <p className="text-white font-medium">{review.client}</p>
+                <p className="text-white/40 text-sm mt-1">{review.role}</p>
+              </div>
+            </motion.article>
           ))}
         </div>
       </div>
@@ -810,6 +876,7 @@ export default function App() {
       <FeaturedVideoSection />
       <PhilosophySection />
       <ServicesSection />
+      <ClientReviewsSection />
       <PremiumFooter />
     </div>
   );
