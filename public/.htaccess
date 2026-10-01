@@ -1,0 +1,36 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # 1. Do NOT touch requests for /api/
+    RewriteRule ^api/ - [L]
+
+    # 2. Serve physical files or directories if they exist
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # 3. Fallback all SPA routes to index.html
+    RewriteRule ^ index.html [L]
+</IfModule>
+
+# Disable directory indexing
+Options -Indexes
+
+# Block sensitive files and directories
+<FilesMatch "^\.|\.(env|sql|md|log|json|lock|bak|config)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Allow index.html
+<Files "index.html">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+</Files>

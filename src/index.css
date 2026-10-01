@@ -13,7 +13,7 @@
 html {
   background: black;
   scroll-behavior: smooth;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
@@ -21,7 +21,7 @@ body {
   min-height: 100vh;
   margin: 0;
   background: black;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 #root {

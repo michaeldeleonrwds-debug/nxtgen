@@ -4,12 +4,41 @@ import {
   Globe,
   ArrowRight,
   ArrowUpRight,
+  Send,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 import webMobileImage from './assets/web-mobile.webp';
 import cmsNoCodeImage from './assets/CMS & No code.webp';
 import arduinoIotImage from './assets/Arduino & Iot.webp';
 import designBrandingImage from './assets/Design and Branding.webp';
 import siteLogo from './assets/sitelogo.webp';
+import { AdminPanel } from './admin/AdminPanel';
+import {
+  ProjectsPage,
+  ProjectCard,
+} from './components/ProjectsPage';
+import {
+  TeamPage,
+  resolveTeamMemberMedia,
+} from './components/TeamPage';
+import {
+  fetchPublicContent,
+  submitInquiry,
+  type ServiceItem,
+  type ReviewItem,
+  type ProjectItem,
+  type TeamMember,
+} from './admin/api';
+
+const resolveServiceImage = (url?: string) => {
+  if (!url) return webMobileImage;
+  if (url.includes('web-mobile')) return webMobileImage;
+  if (url.includes('CMS') || url.includes('No code')) return cmsNoCodeImage;
+  if (url.includes('Arduino') || url.includes('Iot')) return arduinoIotImage;
+  if (url.includes('Design') || url.includes('Branding')) return designBrandingImage;
+  return url;
+};
 
 const globalCss = `
   @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
@@ -130,7 +159,15 @@ const TechLogo = ({ tech, className }: { tech: Tech; className: string }) => {
   return <img src={`https://cdn.simpleicons.org/${tech.slug}/white`} alt={tech.name} className={className} />;
 };
 
-const HeroSection = () => {
+const HeroSection = ({
+  settings,
+  onOpenProjects,
+  onOpenTeam,
+}: {
+  settings?: Record<string, string>;
+  onOpenProjects?: () => void;
+  onOpenTeam?: () => void;
+}) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const fadeState = useRef<'idle' | 'fadingIn' | 'fadingOut'>('idle');
 
@@ -193,7 +230,7 @@ const HeroSection = () => {
       <video
         ref={videoRef}
         className="absolute inset-0 w-full h-full object-cover object-bottom"
-        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_074625_a81f018a-956b-43fb-9aee-4d1508e30e6a.mp4"
+        src={settings?.hero_video_url || "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_074625_a81f018a-956b-43fb-9aee-4d1508e30e6a.mp4"}
         muted
         autoPlay
         playsInline
@@ -203,19 +240,49 @@ const HeroSection = () => {
       
       {/* Navbar */}
       <nav className="relative z-20 px-4 sm:px-6 py-4 sm:py-6 w-full">
-        <div className="liquid-glass rounded-2xl sm:rounded-full max-w-5xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center gap-3">
+        <div className="liquid-glass rounded-2xl sm:rounded-full max-w-5xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex justify-between items-center gap-3">
           <div className="flex items-center min-w-0">
-            <img src={siteLogo} alt="NxtGen" className="h-7 sm:h-8 w-auto shrink-0" />
-            <div className="hidden md:flex gap-8 ml-8">
-              {['Features', 'Services', 'About'].map((item) => (
-                <a key={item} href={`#${item.toLowerCase()}`} className="text-white/80 hover:text-white text-sm font-medium transition-colors">
-                  {item}
-                </a>
-              ))}
+            <img src={siteLogo} alt="NxtGen" className="h-7 sm:h-8 w-auto shrink-0 block" />
+            <div className="hidden md:flex items-center gap-8 ml-8">
+              <a
+                href="#features"
+                className="inline-flex items-center h-8 text-white/80 hover:text-white text-sm font-medium transition-colors leading-none cursor-pointer select-none"
+              >
+                Features
+              </a>
+              <a
+                href="#services"
+                className="inline-flex items-center h-8 text-white/80 hover:text-white text-sm font-medium transition-colors leading-none cursor-pointer select-none"
+              >
+                Services
+              </a>
+              <button
+                type="button"
+                onClick={onOpenProjects}
+                className="inline-flex items-center h-8 text-white/80 hover:text-white text-sm font-medium transition-colors cursor-pointer leading-none bg-transparent border-0 p-0 m-0 select-none"
+              >
+                Work
+              </button>
+              <button
+                type="button"
+                onClick={onOpenTeam}
+                className="inline-flex items-center h-8 text-white/80 hover:text-white text-sm font-medium transition-colors cursor-pointer leading-none bg-transparent border-0 p-0 m-0 select-none"
+              >
+                Team
+              </button>
+              <a
+                href="#about"
+                className="inline-flex items-center h-8 text-white/80 hover:text-white text-sm font-medium transition-colors leading-none cursor-pointer select-none"
+              >
+                About
+              </a>
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-            <a href="#contact-form" className="liquid-glass rounded-full px-4 sm:px-6 py-2 text-white text-sm font-medium hover:bg-white/5 transition-colors">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <a
+              href="#contact-form"
+              className="liquid-glass rounded-full px-4 sm:px-6 h-9 sm:h-10 inline-flex items-center justify-center text-white text-sm font-medium hover:bg-white/5 transition-colors leading-none"
+            >
               Contact Us
             </a>
           </div>
@@ -225,11 +292,12 @@ const HeroSection = () => {
       {/* Hero Content */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-10 sm:py-12 text-center -translate-y-[6%] sm:-translate-y-[10%] lg:-translate-y-[20%]">
         <h1 className="text-[clamp(3.75rem,16vw,7rem)] md:text-8xl lg:text-9xl text-white tracking-tight leading-none sm:whitespace-nowrap font-['Instrument_Serif'] font-serif mb-6 sm:mb-8 max-w-[11ch] sm:max-w-none">
-          Build what's <em className="italic font-['Instrument_Serif']">next</em>.
+          {settings?.hero_heading_1 || "Build what's"}{' '}
+          <em className="italic font-['Instrument_Serif']">{settings?.hero_heading_italic || 'next'}</em>.
         </h1>
         
         <p className="text-white text-sm leading-relaxed px-1 sm:px-4 max-w-lg mt-6">
-          Transforming ideas into scalable digital realities. We specialize in custom software, web apps, mobile solutions, and cutting-edge engineering.
+          {settings?.hero_subheading || "Transforming ideas into scalable digital realities. We specialize in custom software, web apps, mobile solutions, and cutting-edge engineering."}
         </p>
         
         <a href="#contact-form" className="liquid-glass rounded-full px-8 py-3 text-white text-sm font-medium hover:bg-white/5 transition-colors mt-6">
@@ -249,7 +317,7 @@ const HeroSection = () => {
   );
 };
 
-const AboutSection = () => {
+const AboutSection = ({ settings }: { settings?: Record<string, string> }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -263,7 +331,7 @@ const AboutSection = () => {
           transition={{ duration: 0.6 }}
           className="text-white/40 text-sm tracking-widest uppercase mb-6"
         >
-          About Us
+          {settings?.about_tagline || 'About Us'}
         </motion.p>
         <motion.h2 
           initial={{ opacity: 0, y: 40 }}
@@ -271,14 +339,22 @@ const AboutSection = () => {
           transition={{ duration: 0.8, delay: 0.1 }}
           className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl text-white leading-[1.08] tracking-tight"
         >
-          Engineering <span className="font-['Instrument_Serif'] italic text-white/60">solutions </span> for <br className="hidden md:block"/> brands that <span className="font-['Instrument_Serif'] italic text-white/60">innovate, scale, and lead.</span>
+          {settings?.about_heading_part1 || 'Engineering'}{' '}
+          <span className="font-['Instrument_Serif'] italic text-white/60">
+            {settings?.about_heading_italic1 || 'solutions'}{' '}
+          </span>
+          {settings?.about_heading_part2 || 'for brands that'}{' '}
+          <br className="hidden md:block"/>
+          <span className="font-['Instrument_Serif'] italic text-white/60">
+            {settings?.about_heading_italic2 || 'innovate, scale, and lead.'}
+          </span>
         </motion.h2>
       </div>
     </section>
   );
 };
 
-const FeaturedVideoSection = () => {
+const FeaturedVideoSection = ({ settings }: { settings?: Record<string, string> }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -293,7 +369,7 @@ const FeaturedVideoSection = () => {
       >
         <video 
           className="w-full h-full object-cover"
-          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260402_054547_9875cfc5-155a-4229-8ec8-b7ba7125cbf8.mp4"
+          src={settings?.about_video_url || "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260402_054547_9875cfc5-155a-4229-8ec8-b7ba7125cbf8.mp4"}
           muted
           autoPlay
           loop
@@ -306,7 +382,7 @@ const FeaturedVideoSection = () => {
           <div className="liquid-glass rounded-2xl p-4 sm:p-6 lg:p-8 max-w-md w-full lg:w-auto">
             <p className="text-white/50 text-xs tracking-widest uppercase mb-3">Our Approach</p>
             <p className="text-white text-sm md:text-base leading-relaxed">
-              We believe in the power of cutting-edge technology. Every project starts with a complex problem, and every line of code opens a new door to digital transformation.
+              {settings?.about_approach_text || "We believe in the power of cutting-edge technology. Every project starts with a complex problem, and every line of code opens a new door to digital transformation."}
             </p>
           </div>
           <motion.a
@@ -384,11 +460,11 @@ const PhilosophySection = () => {
   );
 };
 
-const ServicesSection = () => {
+const ServicesSection = ({ dynamicServices }: { dynamicServices?: ServiceItem[] }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
-  const cards = [
+  const defaultCards = [
     {
       imageUrl: webMobileImage,
       tag: "Development",
@@ -414,6 +490,15 @@ const ServicesSection = () => {
       description: "From striking brand identities to intuitive user interfaces, we obsess over every pixel to deliver visual experiences that feel effortless and look extraordinary."
     }
   ];
+
+  const cards = (dynamicServices && dynamicServices.length > 0)
+    ? dynamicServices.map((s) => ({
+        imageUrl: resolveServiceImage(s.image_url),
+        tag: s.tag,
+        title: s.title,
+        description: s.description,
+      }))
+    : defaultCards;
 
   return (
     <section id="services" ref={ref} className="bg-black py-20 sm:py-28 lg:py-40 px-4 sm:px-6 overflow-hidden relative">
@@ -468,7 +553,121 @@ const ServicesSection = () => {
   );
 };
 
-const ClientReviewsSection = () => {
+const ProjectsSection = ({
+  dynamicProjects,
+  onOpenProjects,
+}: {
+  dynamicProjects?: ProjectItem[];
+  onOpenProjects?: () => void;
+}) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  const defaultProjects: ProjectItem[] = [
+    {
+      id: 1,
+      title: 'Decentralized Asset Infrastructure',
+      category: 'Full Stack & Cloud',
+      description: 'Ultra-low latency web application powered by real-time WebSockets, microservices orchestration, and edge cache invalidation.',
+      tags: 'React, Node.js, WebSockets, Redis, MariaDB',
+      status: 'Production',
+      client: 'Aether Capital',
+      demo_url: 'https://nxtgen.dev',
+      sort_order: 1,
+    },
+    {
+      id: 2,
+      title: 'Global Analytics Observability',
+      category: 'Web Application',
+      description: 'Distributed metrics pipeline providing real-time data ingestion, instant aggregation dashboards, and reactive visual interfaces.',
+      tags: 'TypeScript, Next.js, ClickHouse, Apache, PHP',
+      status: 'Live',
+      client: 'Kinetix Labs',
+      demo_url: 'https://nxtgen.dev',
+      sort_order: 2,
+    },
+    {
+      id: 3,
+      title: 'Enterprise Design & Design Token Engine',
+      category: 'Design & Systems',
+      description: 'Comprehensive multi-brand design system with automated token pipelines and high-fidelity micro-interactions.',
+      tags: 'Figma, Tailwind, React, Storybook',
+      status: 'Active',
+      client: 'Veloce Dynamics',
+      demo_url: 'https://nxtgen.dev',
+      sort_order: 3,
+    },
+    {
+      id: 4,
+      title: 'Industrial IoT Telemetry Hub',
+      category: 'Hardware & IoT',
+      description: 'Edge microcontroller data relay system communicating through MQTT brokers and bidirectional telemetry dashboards.',
+      tags: 'C++, ESP32, MQTT, React, MySQL',
+      status: 'Operational',
+      client: 'OmniSensors Corp',
+      demo_url: 'https://nxtgen.dev',
+      sort_order: 4,
+    },
+  ];
+
+  const projectsToDisplay =
+    dynamicProjects && dynamicProjects.length > 0
+      ? dynamicProjects.slice(0, 4)
+      : defaultProjects;
+
+  return (
+    <section id="work" ref={ref} className="bg-black py-20 sm:py-28 lg:py-36 px-4 sm:px-6 overflow-hidden relative border-t border-white/5">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.03)_0%,_transparent_70%)] pointer-events-none" />
+
+      <div className="max-w-6xl mx-auto relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.7 }}
+          className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12 sm:mb-16"
+        >
+          <div>
+            <p className="text-white/40 text-xs tracking-[0.28em] uppercase mb-3">Featured Work</p>
+            <h2 className="text-3xl md:text-5xl lg:text-6xl text-white tracking-tight leading-none font-medium">
+              Proven results,{' '}
+              <span className="font-['Instrument_Serif'] italic text-white/60">
+                engineered to endure
+              </span>.
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            onClick={onOpenProjects}
+            className="liquid-glass rounded-full px-6 py-3 text-white text-xs sm:text-sm font-semibold hover:bg-white/10 transition-all flex items-center gap-2 self-start md:self-auto cursor-pointer group"
+          >
+            <span>Explore All Projects</span>
+            <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </button>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+          {projectsToDisplay.map((project, idx) => (
+            <ProjectCard key={project.id} project={project} index={idx} />
+          ))}
+        </div>
+
+        <div className="mt-12 text-center">
+          <button
+            type="button"
+            onClick={onOpenProjects}
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium text-sm transition-all hover:scale-105 cursor-pointer"
+          >
+            <span>View Full Portfolio Directory</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const ClientReviewsSection = ({ dynamicReviews }: { dynamicReviews?: ReviewItem[] }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [selectedReview, setSelectedReview] = useState<null | {
@@ -480,7 +679,7 @@ const ClientReviewsSection = () => {
     rating: number;
   }>(null);
 
-  const reviews = [
+  const defaultReviews = [
     {
       quote: "NxtGen turned a messy product idea into a polished platform that felt fast, premium, and ready for real users.",
       client: "Arielle Santos",
@@ -506,6 +705,17 @@ const ClientReviewsSection = () => {
       rating: 5
     }
   ];
+
+  const reviews = (dynamicReviews && dynamicReviews.length > 0)
+    ? dynamicReviews.map((r) => ({
+        quote: r.quote,
+        client: r.client_name,
+        role: r.role,
+        date: r.review_date || 'Recently',
+        project: r.project,
+        rating: r.rating || 5,
+      }))
+    : defaultReviews;
 
   return (
     <section ref={ref} className="bg-black py-20 sm:py-28 lg:py-36 px-4 sm:px-6 overflow-hidden">
@@ -609,7 +819,19 @@ const ClientReviewsSection = () => {
   );
 };
 
-const PremiumFooter = () => {
+const PremiumFooter = ({
+  dynamicTeam,
+  dynamicIdeas,
+  settings,
+  onOpenProjects,
+  onOpenTeam,
+}: {
+  dynamicTeam?: TeamMember[];
+  dynamicIdeas?: string[];
+  settings?: Record<string, string>;
+  onOpenProjects?: () => void;
+  onOpenTeam?: () => void;
+}) => {
   const phrases = [
     "BUILDING DIGITAL EXPERIENCES",
     "ENGINEERING THE FUTURE",
@@ -618,6 +840,34 @@ const PremiumFooter = () => {
     "LET'S BUILD SOMETHING GREAT"
   ];
   const [phraseIndex, setPhraseIndex] = useState(0);
+
+  // Dynamic Inquiries Form state backed by MySQL
+  const [inqForm, setInqForm] = useState({ name: '', email: '', message: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const [statusFeedback, setStatusFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inqForm.name || !inqForm.email || !inqForm.message) return;
+    setSubmitting(true);
+    setStatusFeedback(null);
+    try {
+      const res = await submitInquiry(inqForm);
+      if (res.success) {
+        setStatusFeedback({
+          type: 'success',
+          text: 'Message received! Our team will review it shortly.'
+        });
+        setInqForm({ name: '', email: '', message: '' });
+      } else {
+        setStatusFeedback({ type: 'error', text: res.error || 'Failed to submit.' });
+      }
+    } catch {
+      setStatusFeedback({ type: 'error', text: 'Error connecting to database server.' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -660,19 +910,25 @@ const PremiumFooter = () => {
     { name: "Linux", slug: "linux" }, { name: "Nginx", slug: "nginx" }
   ];
 
-  const ideas = [
-    "AI", "AUTOMATION", "PERFORMANCE", "SCALABILITY", 
-    "DIGITAL PRODUCTS", "WEB EXPERIENCES", "DESIGN SYSTEMS", 
-    "CREATIVE TECHNOLOGY", "INTERACTION", "OPTIMIZATION", 
-    "SEO", "DIGITAL MARKETING"
+  const ideas = (dynamicIdeas && dynamicIdeas.length > 0)
+    ? dynamicIdeas
+    : [
+      "AI", "AUTOMATION", "PERFORMANCE", "SCALABILITY", 
+      "DIGITAL PRODUCTS", "WEB EXPERIENCES", "DESIGN SYSTEMS", 
+      "CREATIVE TECHNOLOGY", "INTERACTION", "OPTIMIZATION", 
+      "SEO", "DIGITAL MARKETING"
+    ];
+
+  const defaultTeamList: TeamMember[] = [
+    { id: 1, name: "Michael de Leon", role: "Full Stack Engineer & Tech Lead", initials: "MD", sort_order: 1, is_active: 1 },
+    { id: 2, name: "Mc Denver Alba", role: "Frontend & Systems Engineer", initials: "MA", sort_order: 2, is_active: 1 },
+    { id: 3, name: "Bryl Fayosal", role: "DevOps & Backend Engineer", initials: "BF", sort_order: 3, is_active: 1 },
+    { id: 4, name: "Marc Paul Tuquilar", role: "UI/UX & Creative Director", initials: "MT", sort_order: 4, is_active: 1 },
   ];
 
-  const devs = [
-    "Michael de Leon",
-    "Mc Denver Alba",
-    "Bryl Fayosal",
-    "Marc Paul Tuquilar"
-  ];
+  const teamMembersList: TeamMember[] = (dynamicTeam && dynamicTeam.length > 0)
+    ? dynamicTeam
+    : defaultTeamList;
 
   return (
     <footer className="bg-black pt-20 sm:pt-28 lg:pt-48 pb-10 overflow-hidden relative border-t border-white/10">
@@ -706,7 +962,7 @@ const PremiumFooter = () => {
                           visible: { 
                             opacity: 1, 
                             y: 0, 
-                            x: 0,
+                            x: 0, 
                             filter: "blur(0px)",
                             scale: 1,
                             transition: { 
@@ -741,16 +997,40 @@ const PremiumFooter = () => {
         </div>
       </div>
 
-      {/* 2 & 3. Backend & Frontend Marquees */}
-      <div className="flex flex-col gap-8 sm:gap-12 mb-20 sm:mb-32 lg:mb-48 border-y border-white/5 py-10 sm:py-16 bg-white/[0.01]">
+      {/* Tech Stacks & Marquees Container (Infrastructure First on Top) */}
+      <div className="flex flex-col gap-8 sm:gap-10 mb-20 sm:mb-32 lg:mb-48 border-y border-white/5 py-10 sm:py-16 bg-white/[0.01]">
         
-        {/* Backend - Moves Left */}
+        {/* 1. Infrastructure - Moves Left (At the Top) */}
         <div className="relative flex flex-col items-start w-full group">
+          <div className="px-4 sm:px-8 mb-2">
+            <span className="text-white/40 text-[11px] font-mono tracking-widest uppercase">01 / Cloud & Infrastructure</span>
+          </div>
           <div className="flex overflow-hidden w-full" style={{ maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)' }}>
             <motion.div 
               className="flex gap-10 sm:gap-12 lg:gap-14 items-center min-w-max pr-10 sm:pr-12 lg:pr-14"
               animate={{ x: ["0%", "-50%"] }}
               transition={{ repeat: Infinity, ease: "linear", duration: 42 }}
+            >
+              {[...infraTech, ...infraTech].map((tech, i) => (
+                <div key={i} className="flex items-center gap-4 sm:gap-5 text-white/50 hover:text-white transition-colors duration-500">
+                  <TechLogo tech={tech} className="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 opacity-80 group-hover:opacity-100 transition-opacity text-white" />
+                  <span className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight">{tech.name}</span>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+        </div>
+
+        {/* 2. Backend - Moves Right */}
+        <div className="relative flex flex-col items-start w-full group">
+          <div className="px-4 sm:px-8 mb-2">
+            <span className="text-white/40 text-[11px] font-mono tracking-widest uppercase">02 / Backend & Databases</span>
+          </div>
+          <div className="flex overflow-hidden w-full" style={{ maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)' }}>
+            <motion.div 
+              className="flex gap-10 sm:gap-12 lg:gap-14 items-center min-w-max pr-10 sm:pr-12 lg:pr-14"
+              animate={{ x: ["-50%", "0%"] }}
+              transition={{ repeat: Infinity, ease: "linear", duration: 40 }}
             >
               {[...backendTech, ...backendTech].map((tech, i) => (
                 <div key={i} className="flex items-center gap-4 sm:gap-5 text-white/50 hover:text-white transition-colors duration-500">
@@ -762,12 +1042,15 @@ const PremiumFooter = () => {
           </div>
         </div>
 
-        {/* Frontend - Moves Right */}
+        {/* 3. Frontend - Moves Left */}
         <div className="relative flex flex-col items-start w-full group">
+          <div className="px-4 sm:px-8 mb-2">
+            <span className="text-white/40 text-[11px] font-mono tracking-widest uppercase">03 / Frontend & Mobile</span>
+          </div>
           <div className="flex overflow-hidden w-full" style={{ maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)' }}>
             <motion.div 
               className="flex gap-10 sm:gap-12 lg:gap-14 items-center min-w-max pr-10 sm:pr-12 lg:pr-14"
-              animate={{ x: ["-50%", "0%"] }}
+              animate={{ x: ["0%", "-50%"] }}
               transition={{ repeat: Infinity, ease: "linear", duration: 38 }}
             >
               {[...frontendTech, ...frontendTech].map((tech, i) => (
@@ -780,13 +1063,16 @@ const PremiumFooter = () => {
           </div>
         </div>
 
-        {/* Designer & Video Tools - Moves Left */}
+        {/* 4. Designer & Video Tools - Moves Right */}
         <div className="relative flex flex-col items-start w-full group">
+          <div className="px-4 sm:px-8 mb-2">
+            <span className="text-white/40 text-[11px] font-mono tracking-widest uppercase">04 / Design & Visual Motion</span>
+          </div>
           <div className="flex overflow-hidden w-full" style={{ maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)' }}>
             <motion.div 
               className="flex gap-10 sm:gap-12 lg:gap-14 items-center min-w-max pr-10 sm:pr-12 lg:pr-14"
-              animate={{ x: ["0%", "-50%"] }}
-              transition={{ repeat: Infinity, ease: "linear", duration: 40 }}
+              animate={{ x: ["-50%", "0%"] }}
+              transition={{ repeat: Infinity, ease: "linear", duration: 42 }}
             >
               {[...designerTech, ...designerTech].map((tech, i) => (
                 <div key={i} className="flex items-center gap-4 sm:gap-5 text-white/50 hover:text-white transition-colors duration-500">
@@ -799,21 +1085,70 @@ const PremiumFooter = () => {
         </div>
       </div>
 
-      {/* Engineering Team Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-20 sm:mb-32">
-        <div className="flex items-center gap-2 mb-6">
-          <Globe className="w-5 h-5 text-white/40" />
-          <p className="text-white/40 text-xs tracking-widest uppercase">Engineering & Design Team</p>
+      {/* Engineering & Design Team Section */}
+      <div id="team" className="max-w-7xl mx-auto px-4 sm:px-6 mb-20 sm:mb-32 lg:mb-40">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-10 sm:mb-12">
+          <div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl text-white font-medium tracking-tight">
+              Engineering & Design{' '}
+              <span className="font-['Instrument_Serif'] italic text-white/60">
+                collective
+              </span>.
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            onClick={onOpenTeam}
+            className="liquid-glass rounded-full px-5 py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-white/10 transition-all flex items-center gap-2 self-start sm:self-auto cursor-pointer group"
+          >
+            <span>Explore Full Team Profiles</span>
+            <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {devs.map((dev, idx) => (
-            <div key={idx} className="liquid-glass rounded-2xl p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-xs text-white/80 uppercase tracking-widest font-bold">
-                {dev.split(' ').map(n => n[0]).join('').substring(0, 2)}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {teamMembersList.map((member, idx) => {
+            const meta = resolveTeamMemberMedia(member);
+
+            return (
+              <div
+                key={member.id || idx}
+                onClick={onOpenTeam}
+                className="liquid-glass rounded-2xl sm:rounded-3xl p-6 sm:p-7 flex flex-col justify-between group cursor-pointer hover:bg-white/[0.04] transition-all duration-300"
+              >
+                <div>
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="w-16 h-16 rounded-2xl overflow-hidden bg-white/5 border border-white/10 shrink-0">
+                      <img
+                        src={meta.avatar}
+                        alt={member.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </div>
+                    <div className="liquid-glass rounded-full p-2">
+                      <ArrowUpRight className="w-4 h-4 text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </div>
+                  </div>
+
+                  <h3 className="text-white text-xl font-medium tracking-tight mb-1">
+                    {member.name}
+                  </h3>
+                  <p className="text-white/40 text-xs font-mono mb-4">
+                    {member.role}
+                  </p>
+                  <p className="text-white/60 text-sm leading-relaxed line-clamp-3">
+                    {meta.bio}
+                  </p>
+                </div>
+
+                <div className="pt-5 mt-6 border-t border-white/10 flex items-center justify-between text-xs text-white/40">
+                  <span className="font-mono text-[11px] text-white/30">0{idx + 1}</span>
+                  <span className="text-white/60 group-hover:text-white transition-colors">View Profile</span>
+                </div>
               </div>
-              <p className="text-white/90 text-sm font-medium">{dev}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -832,30 +1167,7 @@ const PremiumFooter = () => {
         </div>
       </div>
 
-      {/* 4. Infrastructure Marquee */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-20 sm:mb-32">
-        <div className="liquid-glass rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-10 flex flex-col gap-5 sm:gap-6 overflow-hidden">
-          <div className="shrink-0 w-full text-left">
-            <span className="text-white/50 text-xs tracking-widest uppercase">Infrastructure</span>
-          </div>
-          <div className="flex overflow-hidden w-full" style={{ maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)' }}>
-            <motion.div 
-              className="flex gap-9 sm:gap-11 lg:gap-12 items-center min-w-max pr-9 sm:pr-11 lg:pr-12"
-              animate={{ x: ["0%", "-50%"] }}
-              transition={{ repeat: Infinity, ease: "linear", duration: 44 }}
-            >
-              {[...infraTech, ...infraTech].map((tech, i) => (
-                <div key={i} className="flex items-center gap-4 text-white/55 hover:text-white transition-colors duration-500">
-                  <TechLogo tech={tech} className="w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 opacity-85 transition-opacity text-white" />
-                  <span className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight">{tech.name}</span>
-                </div>
-              ))}
-            </motion.div>
-          </div>
-        </div>
-      </div>
-
-      {/* 7. Contact CTA */}
+      {/* 7. Contact CTA & Dynamic Form */}
       <div id="contact" className="max-w-7xl mx-auto px-5 sm:px-6 mb-16 sm:mb-32 lg:mb-40 flex flex-col items-center text-center scroll-mt-24">
         <p className="text-white/45 text-xs sm:text-lg md:text-xl mb-3 uppercase tracking-[0.28em]">Have an idea?</p>
         <h2 className="text-5xl sm:text-5xl md:text-7xl lg:text-8xl leading-none font-['Instrument_Serif'] text-white mb-8 sm:mb-10">
@@ -871,16 +1183,36 @@ const PremiumFooter = () => {
         </motion.a>
         <form
           id="contact-form"
-          onSubmit={(event) => event.preventDefault()}
+          onSubmit={handleContactSubmit}
           className="liquid-glass rounded-3xl w-full max-w-3xl p-5 sm:p-8 scroll-mt-24 text-left"
         >
+          {statusFeedback && (
+            <div
+              className={`mb-5 p-4 rounded-2xl flex items-center gap-3 text-xs sm:text-sm font-medium ${
+                statusFeedback.type === 'success'
+                  ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300'
+                  : 'bg-rose-500/15 border border-rose-500/30 text-rose-300'
+              }`}
+            >
+              {statusFeedback.type === 'success' ? (
+                <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />
+              ) : (
+                <AlertCircle className="w-5 h-5 shrink-0 text-rose-400" />
+              )}
+              <span>{statusFeedback.text}</span>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.18em] text-white/45">
               Name
               <input
                 type="text"
                 name="name"
+                required
                 placeholder="Your name"
+                value={inqForm.name}
+                onChange={(e) => setInqForm({ ...inqForm, name: e.target.value })}
                 className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm normal-case tracking-normal text-white outline-none placeholder:text-white/30 focus:border-white/35"
               />
             </label>
@@ -889,7 +1221,10 @@ const PremiumFooter = () => {
               <input
                 type="email"
                 name="email"
+                required
                 placeholder="you@example.com"
+                value={inqForm.email}
+                onChange={(e) => setInqForm({ ...inqForm, email: e.target.value })}
                 className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm normal-case tracking-normal text-white outline-none placeholder:text-white/30 focus:border-white/35"
               />
             </label>
@@ -898,14 +1233,22 @@ const PremiumFooter = () => {
             Project Details
             <textarea
               name="message"
+              required
               placeholder="Tell us what you want to build..."
               rows={5}
+              value={inqForm.message}
+              onChange={(e) => setInqForm({ ...inqForm, message: e.target.value })}
               className="resize-none rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm normal-case tracking-normal text-white outline-none placeholder:text-white/30 focus:border-white/35"
             />
           </label>
-          <div className="mt-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <button type="submit" className="rounded-full bg-white px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-white/90">
-              Send Message
+          <div className="mt-5 flex flex-col sm:flex-row sm:items-center sm:justify-start gap-4">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="rounded-full bg-white px-7 py-3 text-sm font-semibold text-black transition-colors hover:bg-white/90 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-lg"
+            >
+              <Send className="w-4 h-4" />
+              <span>{submitting ? 'Sending...' : 'Send Message'}</span>
             </button>
           </div>
         </form>
@@ -917,9 +1260,22 @@ const PremiumFooter = () => {
           <span className="text-white uppercase tracking-[0.22em] text-xs mb-1 sm:mb-3">Navigation</span>
           <a href="#about" className="hover:text-white transition-colors">About</a>
           <a href="#services" className="hover:text-white transition-colors">Services</a>
-          <a href="#services" className="hover:text-white transition-colors">Work</a>
+          <button
+            type="button"
+            onClick={onOpenProjects}
+            className="text-left text-white/55 hover:text-white transition-colors cursor-pointer bg-transparent border-0 p-0 text-sm"
+          >
+            Work
+          </button>
+          <button
+            type="button"
+            onClick={onOpenTeam}
+            className="text-left text-white/55 hover:text-white transition-colors cursor-pointer bg-transparent border-0 p-0 text-sm"
+          >
+            Team
+          </button>
           <a href="#about" className="hover:text-white transition-colors">Blog</a>
-          <a href="#contact-form" className="hover:text-white transition-colors">Contact</a>
+          <a href="#contact" className="hover:text-white transition-colors">Contact</a>
         </div>
         <div className="footer-panel liquid-glass rounded-2xl p-5 sm:p-0 sm:bg-transparent sm:backdrop-blur-0 sm:shadow-none sm:border-0 flex flex-col gap-4">
           <span className="text-white uppercase tracking-[0.22em] text-xs mb-1 sm:mb-3">Social</span>
@@ -932,13 +1288,13 @@ const PremiumFooter = () => {
         <div className="footer-panel liquid-glass rounded-2xl p-5 sm:p-0 sm:bg-transparent sm:backdrop-blur-0 sm:shadow-none sm:border-0 flex flex-col gap-4 sm:col-span-2 lg:col-span-2 lg:text-right">
           <span className="text-white uppercase tracking-[0.22em] text-xs mb-1 sm:mb-3">Headquarters</span>
           <p className="leading-relaxed">
-            Cauayan City,<br/>
-            Cagayan Valley, Philippines
+            {settings?.headquarters_line1 || 'Cauayan City,'}<br/>
+            {settings?.headquarters_line2 || 'Cagayan Valley, Philippines'}
           </p>
           <div className="mt-auto pt-6 sm:pt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 lg:justify-end text-xs text-white/35">
             <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-            <span>&copy; {new Date().getFullYear()} NxtGen Company.</span>
+            <span>&copy; {new Date().getFullYear()} {settings?.footer_brand_text || 'NXTGEN'} Company.</span>
           </div>
         </div>
       </div>
@@ -946,7 +1302,7 @@ const PremiumFooter = () => {
       {/* 9. Final Brand Statement */}
       <div className="w-full overflow-hidden border-t border-white/5 pt-8 sm:pt-10 px-5 sm:px-6">
         <p className="text-center text-[clamp(4.4rem,22vw,18rem)] leading-none font-bold tracking-tight text-white/10 sm:text-white/5 whitespace-nowrap select-none" aria-hidden="true">
-          NXTGEN
+          {settings?.footer_brand_text || 'NXTGEN'}
         </p>
       </div>
       
@@ -955,16 +1311,126 @@ const PremiumFooter = () => {
 };
 
 export default function App() {
+  const [viewMode, setViewMode] = useState<'website' | 'projects' | 'team' | 'admin'>('website');
+  const [siteData, setSiteData] = useState<{
+    settings?: Record<string, string>;
+    services?: ServiceItem[];
+    reviews?: ReviewItem[];
+    projects?: ProjectItem[];
+    team?: TeamMember[];
+    ideas?: string[];
+  }>({});
+
+  const loadData = () => {
+    fetchPublicContent()
+      .then((data) => {
+        if (data) setSiteData(data);
+      })
+      .catch((err) => console.warn('Using default content:', err));
+  };
+
+  useEffect(() => {
+    const resolveView = (): 'website' | 'projects' | 'team' | 'admin' => {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+
+      if (path === '/admin' || path.startsWith('/admin/') || hash === '#admin') {
+        return 'admin';
+      }
+      if (path === '/projects' || path.startsWith('/projects/') || hash === '#projects' || hash === '#projects-page') {
+        return 'projects';
+      }
+      if (path === '/team' || path.startsWith('/team/') || hash === '#team-page') {
+        return 'team';
+      }
+      return 'website';
+    };
+
+    setViewMode(resolveView());
+
+    const handleRoute = () => {
+      setViewMode(resolveView());
+    };
+
+    window.addEventListener('hashchange', handleRoute);
+    window.addEventListener('popstate', handleRoute);
+    loadData();
+
+    return () => {
+      window.removeEventListener('hashchange', handleRoute);
+      window.removeEventListener('popstate', handleRoute);
+    };
+  }, []);
+
+  const handleOpenWebsite = () => {
+    window.location.hash = '';
+    if (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/projects') || window.location.pathname.startsWith('/team')) {
+      window.history.pushState(null, '', '/');
+    }
+    setViewMode('website');
+    loadData();
+  };
+
+  const handleOpenProjects = () => {
+    window.history.pushState(null, '', '/projects');
+    setViewMode('projects');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleOpenTeam = () => {
+    window.history.pushState(null, '', '/team');
+    setViewMode('team');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  if (viewMode === 'admin') {
+    return <AdminPanel onViewPublicSite={handleOpenWebsite} />;
+  }
+
+  if (viewMode === 'projects') {
+    return (
+      <ProjectsPage
+        projects={siteData.projects || []}
+        settings={siteData.settings}
+        onBackToHome={handleOpenWebsite}
+      />
+    );
+  }
+
+  if (viewMode === 'team') {
+    return (
+      <TeamPage
+        team={siteData.team || []}
+        settings={siteData.settings}
+        onBackToHome={handleOpenWebsite}
+      />
+    );
+  }
+
   return (
-    <div className="bg-black text-white min-h-screen selection:bg-white/30 selection:text-white">
+    <div className="bg-black text-white min-h-screen selection:bg-white/30 selection:text-white relative">
       <style dangerouslySetInnerHTML={{ __html: globalCss }} />
-      <HeroSection />
-      <AboutSection />
-      <FeaturedVideoSection />
+      <HeroSection
+        settings={siteData.settings}
+        onOpenProjects={handleOpenProjects}
+        onOpenTeam={handleOpenTeam}
+      />
+      <AboutSection settings={siteData.settings} />
+      <FeaturedVideoSection settings={siteData.settings} />
       <PhilosophySection />
-      <ServicesSection />
-      <ClientReviewsSection />
-      <PremiumFooter />
+      <ServicesSection dynamicServices={siteData.services} />
+      <ProjectsSection
+        dynamicProjects={siteData.projects}
+        onOpenProjects={handleOpenProjects}
+      />
+      <ClientReviewsSection dynamicReviews={siteData.reviews} />
+      <PremiumFooter
+        dynamicTeam={siteData.team}
+        dynamicIdeas={siteData.ideas}
+        settings={siteData.settings}
+        onOpenProjects={handleOpenProjects}
+        onOpenTeam={handleOpenTeam}
+      />
     </div>
   );
 }
