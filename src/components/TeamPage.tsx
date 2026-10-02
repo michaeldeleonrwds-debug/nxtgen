@@ -297,22 +297,24 @@ export const TeamPage: React.FC<TeamPageProps> = ({
 
       {/* Team Grid */}
       <section className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pb-24 sm:pb-32">
-        <motion.div
-          layout
-          className="grid grid-cols-1 md:grid-cols-2 gap-8"
-        >
-          <AnimatePresence>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedRole}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-8"
+          >
             {filteredMembers.map((member, idx) => {
               const meta = resolveTeamMemberMedia(member);
 
               return (
                 <motion.article
-                  layout
                   key={member.id}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.4, delay: idx * 0.08 }}
+                  transition={{ duration: 0.35, delay: Math.min(idx * 0.05, 0.2), ease: 'easeOut' }}
                   className="liquid-glass rounded-2xl sm:rounded-3xl p-6 sm:p-8 flex flex-col justify-between group hover:bg-white/[0.04] transition-all duration-300"
                 >
                   <div>
@@ -399,8 +401,8 @@ export const TeamPage: React.FC<TeamPageProps> = ({
                 </motion.article>
               );
             })}
-          </AnimatePresence>
-        </motion.div>
+          </motion.div>
+        </AnimatePresence>
       </section>
 
       {/* Engineering Principles & Culture */}

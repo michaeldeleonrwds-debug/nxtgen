@@ -53,12 +53,9 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index }) => {
 
   return (
     <motion.article
-      layout
-      key={project.id}
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.4, delay: index * 0.08 }}
+      transition={{ duration: 0.35, delay: Math.min(index * 0.05, 0.2), ease: 'easeOut' }}
       className="liquid-glass rounded-2xl sm:rounded-3xl overflow-hidden border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between group hover:bg-white/[0.04]"
     >
       {/* Top Preview Image Container */}
@@ -331,16 +328,20 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
 
       {/* Projects Showcase Grid */}
       <section className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pb-24 sm:pb-32">
-        <motion.div
-          layout
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8"
-        >
-          <AnimatePresence>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedCategory}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8"
+          >
             {filteredProjects.map((project, idx) => (
               <ProjectCard key={project.id} project={project} index={idx} />
             ))}
-          </AnimatePresence>
-        </motion.div>
+          </motion.div>
+        </AnimatePresence>
 
         {filteredProjects.length === 0 && (
           <div className="py-24 text-center liquid-glass rounded-3xl border border-white/10 p-8">
