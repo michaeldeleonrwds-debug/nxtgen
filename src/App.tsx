@@ -53,6 +53,177 @@ const globalCss = `
     box-sizing: border-box;
   }
 
+  @keyframes brokenLightFlicker {
+    0%, 100% {
+      opacity: 0.95;
+      color: #ffffff;
+      text-shadow: 
+        0 0 6px rgba(255, 255, 255, 0.95),
+        0 0 16px rgba(255, 255, 255, 0.8),
+        0 0 35px rgba(255, 255, 255, 0.5),
+        0 0 75px rgba(255, 255, 255, 0.3);
+    }
+    1.4% {
+      opacity: 0.12;
+      color: rgba(255, 255, 255, 0.1);
+      text-shadow: none;
+    }
+    2.8% {
+      opacity: 0.92;
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.95), 0 0 24px rgba(255, 255, 255, 0.7);
+    }
+    3.8% {
+      opacity: 0.08;
+      color: rgba(255, 255, 255, 0.08);
+      text-shadow: none;
+    }
+    4.8% {
+      opacity: 0.98;
+      color: #ffffff;
+      text-shadow: 
+        0 0 10px rgba(255, 255, 255, 1),
+        0 0 25px rgba(255, 255, 255, 0.85),
+        0 0 50px rgba(255, 255, 255, 0.55);
+    }
+    5.6% {
+      opacity: 0.18;
+      color: rgba(255, 255, 255, 0.12);
+      text-shadow: none;
+    }
+    6.6% {
+      opacity: 0.96;
+      color: #ffffff;
+      text-shadow: 
+        0 0 7px rgba(255, 255, 255, 0.95),
+        0 0 18px rgba(255, 255, 255, 0.75),
+        0 0 40px rgba(255, 255, 255, 0.45);
+    }
+    26% {
+      opacity: 0.96;
+      color: #ffffff;
+      text-shadow: 
+        0 0 7px rgba(255, 255, 255, 0.95),
+        0 0 18px rgba(255, 255, 255, 0.75),
+        0 0 40px rgba(255, 255, 255, 0.45);
+    }
+    26.4% {
+      opacity: 0.1;
+      color: rgba(255, 255, 255, 0.08);
+      text-shadow: none;
+    }
+    27% {
+      opacity: 0.92;
+      color: #ffffff;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.85);
+    }
+    52% {
+      opacity: 0.96;
+      text-shadow: 
+        0 0 7px rgba(255, 255, 255, 0.95),
+        0 0 18px rgba(255, 255, 255, 0.75),
+        0 0 40px rgba(255, 255, 255, 0.45);
+    }
+    52.4% {
+      opacity: 0.08;
+      color: rgba(255, 255, 255, 0.08);
+      text-shadow: none;
+    }
+    53.2% {
+      opacity: 0.98;
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.95), 0 0 30px rgba(255, 255, 255, 0.75);
+    }
+    53.8% {
+      opacity: 0.12;
+      text-shadow: none;
+    }
+    54.6% {
+      opacity: 0.96;
+      color: #ffffff;
+      text-shadow: 
+        0 0 7px rgba(255, 255, 255, 0.95),
+        0 0 18px rgba(255, 255, 255, 0.75),
+        0 0 40px rgba(255, 255, 255, 0.45);
+    }
+    76% {
+      opacity: 0.96;
+    }
+    76.4% {
+      opacity: 0.22;
+      text-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+    }
+    77% {
+      opacity: 0.96;
+      text-shadow: 
+        0 0 7px rgba(255, 255, 255, 0.95),
+        0 0 18px rgba(255, 255, 255, 0.75),
+        0 0 40px rgba(255, 255, 255, 0.45);
+    }
+    89% {
+      opacity: 0.96;
+    }
+    89.3% {
+      opacity: 0.04;
+      color: rgba(255, 255, 255, 0.05);
+      text-shadow: none;
+    }
+    89.8% {
+      opacity: 0.85;
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    }
+    90.2% {
+      opacity: 0.08;
+      text-shadow: none;
+    }
+    90.8% {
+      opacity: 1;
+      color: #ffffff;
+      text-shadow: 
+        0 0 12px rgba(255, 255, 255, 1),
+        0 0 28px rgba(255, 255, 255, 0.9),
+        0 0 60px rgba(255, 255, 255, 0.6),
+        0 0 100px rgba(255, 255, 255, 0.4);
+    }
+  }
+
+  @keyframes brokenLightBackdrop {
+    0%, 100% { opacity: 0.35; transform: scale(1); }
+    1.4% { opacity: 0.02; transform: scale(0.96); }
+    2.8% { opacity: 0.28; transform: scale(1); }
+    3.8% { opacity: 0.02; transform: scale(0.95); }
+    4.8% { opacity: 0.48; transform: scale(1.06); }
+    5.6% { opacity: 0.05; transform: scale(0.97); }
+    6.6% { opacity: 0.35; transform: scale(1); }
+    26% { opacity: 0.35; }
+    26.4% { opacity: 0.03; }
+    27% { opacity: 0.32; }
+    52% { opacity: 0.35; }
+    52.4% { opacity: 0.02; }
+    53.2% { opacity: 0.42; }
+    53.8% { opacity: 0.05; }
+    54.6% { opacity: 0.35; }
+    76% { opacity: 0.35; }
+    76.4% { opacity: 0.08; }
+    77% { opacity: 0.35; }
+    89% { opacity: 0.35; }
+    89.3% { opacity: 0.02; }
+    89.8% { opacity: 0.3; }
+    90.2% { opacity: 0.03; }
+    90.8% { opacity: 0.52; transform: scale(1.08); }
+  }
+
+  .broken-light-text {
+    animation: brokenLightFlicker 6.2s infinite linear;
+    will-change: opacity, text-shadow, color;
+  }
+
+  .broken-light-glow {
+    animation: brokenLightBackdrop 6.2s infinite linear;
+    will-change: opacity, transform;
+  }
+
   @layer components {
     .liquid-glass { 
       background: rgba(255, 255, 255, 0.01); 
@@ -1379,46 +1550,20 @@ const PremiumFooter = ({
         </div>
       </div>
 
-      {/* 9. Final Brand Statement with Glowing Animation */}
+      {/* 9. Final Brand Statement with White Broken Light / Neon Flicker Animation */}
       <div className="w-full overflow-hidden border-t border-white/5 pt-8 sm:pt-10 pb-4 px-5 sm:px-6 relative flex items-center justify-center">
-        {/* Soft Ambient Radial Backlight Glow */}
-        <motion.div
-          animate={{
-            opacity: [0.12, 0.35, 0.12],
-            scale: [0.95, 1.08, 0.95],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute w-[min(90vw,700px)] h-36 bg-emerald-500/20 blur-[100px] rounded-full pointer-events-none -bottom-6"
+        {/* Synchronized Ambient White Glow Behind */}
+        <div
+          className="broken-light-glow absolute w-[min(90vw,750px)] h-36 bg-white/20 blur-[110px] rounded-full pointer-events-none -bottom-6"
         />
 
-        {/* Pulsing Luminous Brand Text */}
-        <motion.p
-          animate={{
-            textShadow: [
-              "0 0 15px rgba(16, 185, 129, 0.08), 0 0 30px rgba(16, 185, 129, 0.03)",
-              "0 0 30px rgba(16, 185, 129, 0.35), 0 0 60px rgba(16, 185, 129, 0.18), 0 0 90px rgba(16, 185, 129, 0.08)",
-              "0 0 15px rgba(16, 185, 129, 0.08), 0 0 30px rgba(16, 185, 129, 0.03)",
-            ],
-            color: [
-              "rgba(255, 255, 255, 0.07)",
-              "rgba(255, 255, 255, 0.22)",
-              "rgba(255, 255, 255, 0.07)",
-            ],
-          }}
-          transition={{
-            duration: 3.8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="relative text-center text-[clamp(4.4rem,22vw,18rem)] leading-none font-bold tracking-tight whitespace-nowrap select-none cursor-default transition-all duration-500 hover:text-white/35 hover:drop-shadow-[0_0_40px_rgba(52,211,153,0.5)]"
+        {/* Flickering White Broken Light Typography */}
+        <p
+          className="broken-light-text relative text-center text-[clamp(4.4rem,22vw,18rem)] leading-none font-bold tracking-tight whitespace-nowrap select-none cursor-default transition-all duration-300 hover:opacity-100 hover:drop-shadow-[0_0_50px_rgba(255,255,255,0.9)]"
           aria-hidden="true"
         >
           {settings?.footer_brand_text || 'NXTGEN'}
-        </motion.p>
+        </p>
       </div>
       
     </footer>
