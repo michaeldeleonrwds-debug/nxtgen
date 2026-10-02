@@ -155,7 +155,7 @@ const VideoUploadField: React.FC<VideoUploadFieldProps> = ({
             loop
             playsInline
             onError={() => setVideoError(true)}
-            className="w-full h-44 sm:h-52 object-cover bg-black"
+            className="w-full aspect-video max-h-64 object-cover bg-black"
           />
           {videoError && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 p-4 text-center">

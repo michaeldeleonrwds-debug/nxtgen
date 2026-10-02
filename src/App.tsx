@@ -499,7 +499,7 @@ const PhilosophySection = ({ settings }: { settings?: Record<string, string> }) 
             initial={{ opacity: 0, x: -40 }}
             animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -40 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="rounded-2xl sm:rounded-3xl overflow-hidden aspect-[4/3] relative bg-white/5"
+            className="rounded-2xl sm:rounded-3xl overflow-hidden aspect-video relative bg-white/5 border border-white/10 shadow-2xl"
           >
             <video 
               className="absolute inset-0 w-full h-full object-cover"
