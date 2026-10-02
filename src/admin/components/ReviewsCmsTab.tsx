@@ -89,10 +89,11 @@ export const ReviewsCmsTab: React.FC<ReviewsCmsTabProps> = ({
       } else {
         showToast(res.error || 'Upload failed', 'error');
       }
-    } catch {
-      showToast('Upload error', 'error');
+    } catch (err: any) {
+      showToast(err?.message || 'Avatar upload failed', 'error');
     } finally {
       setUploading(false);
+      if (e.target) e.target.value = '';
     }
   };
 

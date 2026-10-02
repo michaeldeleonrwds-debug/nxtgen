@@ -37,12 +37,17 @@ define('DB_NAME', getenv('DB_NAME') ?: ($_ENV['DB_NAME'] ?? ($_SERVER['DB_NAME']
 define('DB_USER', getenv('DB_USER') ?: ($_ENV['DB_USER'] ?? ($_SERVER['DB_USER'] ?? 'root')));
 define('DB_PASS', getenv('DB_PASSWORD') !== false ? getenv('DB_PASSWORD') : ($_ENV['DB_PASSWORD'] ?? ($_SERVER['DB_PASSWORD'] ?? '')));
 
+// Prevent aggressive browser and proxy caching on live servers
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 // Handle Cross-Origin Resource Sharing (CORS)
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '*';
 header("Access-Control-Allow-Origin: {$origin}");
 header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, Origin, Accept');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Auth-Token, X-Requested-With, Origin, Accept, Cache-Control, Pragma');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -55,6 +60,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 function jsonResponse(mixed $data, int $statusCode = 200): void {
     http_response_code($statusCode);
     header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    header('Expires: 0');
     echo json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     exit;
 }
@@ -92,12 +100,44 @@ function ensureSession(): void {
 
 /**
  * Retrieve Bearer Token or Session Cookie
+ * Resilient against Apache/FastCGI stripping Authorization header
  */
 function getAuthToken(): ?string {
+    // 1. Direct server environment
     $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? ($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '');
+    
+    // 2. Apache request headers
+    if (empty($authHeader) && function_exists('apache_request_headers')) {
+        $headers = apache_request_headers();
+        $authHeader = $headers['Authorization'] ?? ($headers['authorization'] ?? ($headers['X-Auth-Token'] ?? ($headers['x-auth-token'] ?? '')));
+    }
+
+    // 3. Fallback to getallheaders
+    if (empty($authHeader) && function_exists('getallheaders')) {
+        $headers = getallheaders();
+        $authHeader = $headers['Authorization'] ?? ($headers['authorization'] ?? ($headers['X-Auth-Token'] ?? ($headers['x-auth-token'] ?? '')));
+    }
+
+    // 4. Custom HTTP header
+    if (empty($authHeader) && isset($_SERVER['HTTP_X_AUTH_TOKEN'])) {
+        $authHeader = $_SERVER['HTTP_X_AUTH_TOKEN'];
+    }
+
     if (preg_match('/Bearer\s+(\S+)/i', $authHeader, $matches)) {
         return $matches[1];
     }
+    if (!empty($authHeader) && !str_starts_with(strtolower($authHeader), 'bearer')) {
+        return trim($authHeader);
+    }
+
+    // 5. Fallback in POST or GET (crucial for multipart file upload resilience)
+    if (!empty($_POST['token'])) {
+        return (string)$_POST['token'];
+    }
+    if (!empty($_GET['token'])) {
+        return (string)$_GET['token'];
+    }
+
     ensureSession();
     return $_SESSION['nxtgen_auth_token'] ?? null;
 }

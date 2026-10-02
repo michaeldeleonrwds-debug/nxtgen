@@ -223,9 +223,30 @@ export const SettingsCmsTab: React.FC<SettingsCmsTabProps> = ({
 
   const [activeCategory, setActiveCategory] = useState<'general' | 'videos' | 'hero' | 'about' | 'contact' | 'social' | 'seo'>('general');
   const [saving, setSaving] = useState(false);
+  const [ogUploading, setOgUploading] = useState(false);
 
   const handleChange = (key: string, value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleOgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setOgUploading(true);
+    try {
+      const res = await uploadMedia(file);
+      if (res.success && res.url) {
+        handleChange('default_og_image', res.url);
+        showToast('OpenGraph image uploaded!', 'success');
+      } else {
+        showToast(res.error || 'Upload failed', 'error');
+      }
+    } catch (err: any) {
+      showToast(err?.message || 'Upload failed', 'error');
+    } finally {
+      setOgUploading(false);
+      if (e.target) e.target.value = '';
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -734,12 +755,35 @@ export const SettingsCmsTab: React.FC<SettingsCmsTabProps> = ({
               <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
                 Default OpenGraph Share Image URL
               </label>
-              <input
-                type="text"
-                value={formData.default_og_image}
-                onChange={(e) => handleChange('default_og_image', e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-white/10 text-sm text-white font-mono focus:outline-none focus:border-emerald-500"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={formData.default_og_image}
+                  onChange={(e) => handleChange('default_og_image', e.target.value)}
+                  className="flex-1 px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-white/10 text-sm text-white font-mono focus:outline-none focus:border-emerald-500"
+                />
+                <label className="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-xs font-bold text-white flex items-center gap-1.5 cursor-pointer shrink-0">
+                  <UploadCloud className="w-3.5 h-3.5" />
+                  {ogUploading ? 'Uploading...' : 'Upload Image'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleOgUpload}
+                    className="hidden"
+                    disabled={ogUploading}
+                  />
+                </label>
+              </div>
+              {formData.default_og_image && (
+                <div className="mt-2.5 rounded-xl overflow-hidden border border-white/10 w-44 h-24 bg-black/60">
+                  <img
+                    src={formData.default_og_image}
+                    alt="OG Preview"
+                    className="w-full h-full object-cover"
+                    onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
+                  />
+                </div>
+              )}
             </div>
           </div>
         )}

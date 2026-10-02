@@ -146,13 +146,14 @@ export function setStoredUser(user: AdminUser): void {
   localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
 }
 
-function getAuthHeaders(): HeadersInit {
+function getAuthHeaders(): Record<string, string> {
   const token = getAuthToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
+    headers['X-Auth-Token'] = token;
   }
   return headers;
 }
@@ -198,8 +199,9 @@ export async function fetchCurrentUser(): Promise<AdminUser | null> {
   if (!token) return null;
 
   try {
-    const res = await fetch(`${API_BASE}/auth/me`, {
+    const res = await fetch(`${API_BASE}/auth/me?_t=${Date.now()}`, {
       headers: getAuthHeaders(),
+      cache: 'no-store',
     });
     if (!res.ok) {
       clearAuthToken();
@@ -224,25 +226,44 @@ export async function uploadMedia(file: File): Promise<{ success: boolean; url?:
   const token = getAuthToken();
   const formData = new FormData();
   formData.append('file', file);
+  if (token) {
+    formData.append('token', token); // Fallback in case Apache/FastCGI strips Authorization header
+  }
 
   const headers: HeadersInit = {};
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
+    headers['X-Auth-Token'] = token;
   }
 
   try {
-    const res = await fetch(`${API_BASE}/upload`, {
+    const res = await fetch(`${API_BASE}/upload?_t=${Date.now()}`, {
       method: 'POST',
       headers,
       body: formData,
+      cache: 'no-store',
     });
-    const data = await res.json();
+
+    const text = await res.text();
+    let data: any = {};
+    try {
+      data = JSON.parse(text);
+    } catch {
+      if (res.status === 413) {
+        return { success: false, error: 'File size exceeds server upload limit (413 Payload Too Large).' };
+      }
+      if (res.status === 401) {
+        return { success: false, error: 'Session expired or unauthorized. Please re-login.' };
+      }
+      return { success: false, error: `Upload server error (${res.status}): ${text.slice(0, 100) || res.statusText}` };
+    }
+
     if (!res.ok || !data.success) {
-      return { success: false, error: data.error || 'Upload failed' };
+      return { success: false, error: data.error || `Upload failed (${res.status})` };
     }
     return { success: true, url: data.url, filename: data.filename };
   } catch (err: any) {
-    return { success: false, error: err.message || 'Upload failed' };
+    return { success: false, error: err.message || 'Upload network request failed' };
   }
 }
 
@@ -251,13 +272,17 @@ export async function uploadMedia(file: File): Promise<{ success: boolean; url?:
 // ----------------------------------------------------------------------
 
 export async function fetchStats(): Promise<StatsData> {
-  const res = await fetch(`${API_BASE}/stats`);
+  const res = await fetch(`${API_BASE}/stats?_t=${Date.now()}`, {
+    headers: getAuthHeaders(),
+    cache: 'no-store',
+  });
   return res.json();
 }
 
 export async function fetchActivity(): Promise<ActivityLog[]> {
-  const res = await fetch(`${API_BASE}/activity`, {
+  const res = await fetch(`${API_BASE}/activity?_t=${Date.now()}`, {
     headers: getAuthHeaders(),
+    cache: 'no-store',
   });
   if (!res.ok) return [];
   return res.json();
@@ -268,7 +293,9 @@ export async function fetchActivity(): Promise<ActivityLog[]> {
 // ----------------------------------------------------------------------
 
 export async function fetchPublicContent(): Promise<PublicContentBundle> {
-  const res = await fetch(`${API_BASE}/content`);
+  const res = await fetch(`${API_BASE}/content?_t=${Date.now()}`, {
+    cache: 'no-store',
+  });
   return res.json();
 }
 
@@ -277,8 +304,9 @@ export async function fetchPublicContent(): Promise<PublicContentBundle> {
 // ----------------------------------------------------------------------
 
 export async function fetchInquiries(): Promise<Inquiry[]> {
-  const res = await fetch(`${API_BASE}/inquiries`, {
+  const res = await fetch(`${API_BASE}/inquiries?_t=${Date.now()}`, {
     headers: getAuthHeaders(),
+    cache: 'no-store',
   });
   if (!res.ok) return [];
   return res.json();
@@ -315,7 +343,9 @@ export async function deleteInquiry(id: number): Promise<{ success: boolean }> {
 // ----------------------------------------------------------------------
 
 export async function fetchServices(): Promise<ServiceItem[]> {
-  const res = await fetch(`${API_BASE}/services`);
+  const res = await fetch(`${API_BASE}/services?_t=${Date.now()}`, {
+    cache: 'no-store',
+  });
   return res.json();
 }
 
@@ -350,7 +380,9 @@ export async function deleteService(id: number): Promise<{ success: boolean }> {
 // ----------------------------------------------------------------------
 
 export async function fetchProjects(): Promise<ProjectItem[]> {
-  const res = await fetch(`${API_BASE}/projects`);
+  const res = await fetch(`${API_BASE}/projects?_t=${Date.now()}`, {
+    cache: 'no-store',
+  });
   return res.json();
 }
 
@@ -385,7 +417,9 @@ export async function deleteProject(id: number): Promise<{ success: boolean }> {
 // ----------------------------------------------------------------------
 
 export async function fetchReviews(): Promise<ReviewItem[]> {
-  const res = await fetch(`${API_BASE}/reviews`);
+  const res = await fetch(`${API_BASE}/reviews?_t=${Date.now()}`, {
+    cache: 'no-store',
+  });
   return res.json();
 }
 
@@ -420,7 +454,9 @@ export async function deleteReview(id: number): Promise<{ success: boolean }> {
 // ----------------------------------------------------------------------
 
 export async function fetchTeam(): Promise<TeamMember[]> {
-  const res = await fetch(`${API_BASE}/team`);
+  const res = await fetch(`${API_BASE}/team?_t=${Date.now()}`, {
+    cache: 'no-store',
+  });
   return res.json();
 }
 
@@ -455,7 +491,9 @@ export async function deleteTeam(id: number): Promise<{ success: boolean }> {
 // ----------------------------------------------------------------------
 
 export async function fetchIdeas(): Promise<IdeaItem[]> {
-  const res = await fetch(`${API_BASE}/ideas`);
+  const res = await fetch(`${API_BASE}/ideas?_t=${Date.now()}`, {
+    cache: 'no-store',
+  });
   return res.json();
 }
 
@@ -490,7 +528,9 @@ export async function deleteIdea(id: number): Promise<{ success: boolean }> {
 // ----------------------------------------------------------------------
 
 export async function fetchSettings(): Promise<Record<string, string>> {
-  const res = await fetch(`${API_BASE}/settings`);
+  const res = await fetch(`${API_BASE}/settings?_t=${Date.now()}`, {
+    cache: 'no-store',
+  });
   const rows = await res.json();
   const map: Record<string, string> = {};
   if (Array.isArray(rows)) {

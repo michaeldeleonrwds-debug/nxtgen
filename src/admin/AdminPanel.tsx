@@ -183,13 +183,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onViewPublicSite }) => {
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col selection:bg-emerald-500 selection:text-black relative">
-      {/* Toast Alert */}
+      {/* Toast Alert - Stacked above all modals, dialogs, and overlays */}
       {toast && (
         <div
-          className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl border backdrop-blur-xl animate-in slide-in-from-bottom-5 ${
+          className={`fixed bottom-6 right-6 z-[99999] pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl border backdrop-blur-xl animate-in slide-in-from-bottom-5 ${
             toast.type === 'success'
-              ? 'bg-emerald-950/90 border-emerald-500/40 text-emerald-200'
-              : 'bg-rose-950/90 border-rose-500/40 text-rose-200'
+              ? 'bg-emerald-950/95 border-emerald-500/50 text-emerald-200'
+              : 'bg-rose-950/95 border-rose-500/50 text-rose-200'
           }`}
         >
           {toast.type === 'success' ? (

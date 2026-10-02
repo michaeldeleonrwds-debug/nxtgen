@@ -80,10 +80,11 @@ export const ServicesCmsTab: React.FC<ServicesCmsTabProps> = ({
       } else {
         showToast(res.error || 'Upload failed', 'error');
       }
-    } catch {
-      showToast('Image upload failed', 'error');
+    } catch (err: any) {
+      showToast(err?.message || 'Image upload failed', 'error');
     } finally {
       setUploading(false);
+      if (e.target) e.target.value = '';
     }
   };
 

@@ -49,29 +49,40 @@ function handleUpload(): void {
     // Generate safe unique filename
     $safeName = 'nxtgen_' . date('Ymd_His') . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
 
-    // Define upload destinations: both public/uploads (for Vite dev) and uploads/ (for root Apache)
+    // Define primary uploads directory: web root uploads/
     $projectRoot = dirname(__DIR__, 2);
-    $destDirs = [
-        $projectRoot . '/public/uploads',
-        $projectRoot . '/uploads'
-    ];
+    $primaryDir = $projectRoot . '/uploads';
 
-    $saved = false;
-    foreach ($destDirs as $dir) {
-        if (!is_dir($dir)) {
-            @mkdir($dir, 0755, true);
-        }
-        $targetPath = $dir . '/' . $safeName;
-        if (!$saved) {
-            $saved = move_uploaded_file($file['tmp_name'], $targetPath);
-        } else {
-            // Copy to secondary target
-            @copy($destDirs[0] . '/' . $safeName, $targetPath);
+    if (!is_dir($primaryDir)) {
+        @mkdir($primaryDir, 0777, true);
+        @chmod($primaryDir, 0777);
+    }
+
+    $targetPath = $primaryDir . '/' . $safeName;
+    $saved = @move_uploaded_file($file['tmp_name'], $targetPath);
+
+    // Fallback if move_uploaded_file fails due to temp partition or restriction
+    if (!$saved && file_exists($file['tmp_name'])) {
+        $saved = @copy($file['tmp_name'], $targetPath);
+        if ($saved) {
+            @unlink($file['tmp_name']);
         }
     }
 
     if (!$saved) {
-        jsonError('Failed to save uploaded file.', 500);
+        $isWritable = is_writable($primaryDir) ? 'writable' : 'not writable';
+        jsonError("Failed to save uploaded file to {$primaryDir} (directory is {$isWritable}). Please check server folder permissions.", 500);
+    }
+
+    @chmod($targetPath, 0644);
+
+    // If local Vite development environment has public/ folder, mirror file there
+    $publicUploads = $projectRoot . '/public/uploads';
+    if (is_dir($projectRoot . '/public')) {
+        if (!is_dir($publicUploads)) {
+            @mkdir($publicUploads, 0777, true);
+        }
+        @copy($targetPath, $publicUploads . '/' . $safeName);
     }
 
     $publicUrl = '/uploads/' . $safeName;

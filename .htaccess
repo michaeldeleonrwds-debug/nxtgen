@@ -28,8 +28,13 @@ Options -Indexes
     </IfModule>
 </FilesMatch>
 
-# Allow index.html
+# Allow index.html and prevent aggressive caching
 <Files "index.html">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </IfModule>
     <IfModule mod_authz_core.c>
         Require all granted
     </IfModule>

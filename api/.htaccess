@@ -2,6 +2,9 @@
     RewriteEngine On
     RewriteBase /api/
 
+    # Pass Authorization Header to PHP under Apache / FastCGI
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
     # Direct access to index.php
     RewriteRule ^index\.php$ - [L]
 
@@ -9,6 +12,13 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+# Prevent caching on all API endpoints
+<IfModule mod_headers.c>
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
 </IfModule>
 
 # Disable directory browsing

@@ -86,10 +86,11 @@ export const TeamCmsTab: React.FC<TeamCmsTabProps> = ({
       } else {
         showToast(res.error || 'Upload failed', 'error');
       }
-    } catch {
-      showToast('Upload error', 'error');
+    } catch (err: any) {
+      showToast(err?.message || 'Photo upload failed', 'error');
     } finally {
       setUploading(false);
+      if (e.target) e.target.value = '';
     }
   };
 
