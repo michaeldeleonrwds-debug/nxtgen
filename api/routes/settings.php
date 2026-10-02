@@ -28,7 +28,7 @@ function handleSettings(string $method): void {
         foreach ($updates as $key => $val) {
             $cat = 'general';
             if (str_starts_with($key, 'hero_')) $cat = 'hero';
-            elseif (str_starts_with($key, 'about_')) $cat = 'about';
+            elseif (str_starts_with($key, 'about_') || str_starts_with($key, 'philosophy_')) $cat = 'about';
             elseif (str_starts_with($key, 'contact_') || str_starts_with($key, 'headquarters_')) $cat = 'contact';
             elseif (str_starts_with($key, 'meta_') || str_starts_with($key, 'seo_') || str_starts_with($key, 'default_og_')) $cat = 'seo';
             elseif (str_starts_with($key, 'social_')) $cat = 'social';

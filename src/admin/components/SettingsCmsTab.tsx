@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Settings,
   Save,
@@ -9,14 +9,176 @@ import {
   Search,
   CheckCircle2,
   Sparkles,
+  UploadCloud,
+  Trash2,
+  Video,
+  Loader2,
 } from 'lucide-react';
-import { updateSettings } from '../api';
+import { updateSettings, uploadMedia } from '../api';
 
 interface SettingsCmsTabProps {
   settings: Record<string, string>;
   onRefresh: () => void;
   showToast: (msg: string, type?: 'success' | 'error') => void;
 }
+
+interface VideoUploadFieldProps {
+  label: string;
+  description?: string;
+  value: string;
+  onChange: (val: string) => void;
+  showToast: (msg: string, type?: 'success' | 'error') => void;
+}
+
+const VideoUploadField: React.FC<VideoUploadFieldProps> = ({
+  label,
+  description,
+  value,
+  onChange,
+  showToast,
+}) => {
+  const [uploading, setUploading] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check size limit: 100MB
+    if (file.size > 100 * 1024 * 1024) {
+      showToast('Video exceeds 100MB limit', 'error');
+      if (e.target) e.target.value = '';
+      return;
+    }
+
+    setUploading(true);
+    setVideoError(false);
+    try {
+      const res = await uploadMedia(file);
+      if (res.success && res.url) {
+        onChange(res.url);
+        showToast('Background video uploaded successfully!', 'success');
+      } else {
+        showToast(res.error || 'Upload failed', 'error');
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Error uploading video', 'error');
+    } finally {
+      setUploading(false);
+      if (e.target) e.target.value = '';
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-4 sm:p-5 space-y-3.5 backdrop-blur-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+        <div>
+          <label className="block text-xs font-bold text-white tracking-wide flex items-center gap-2">
+            <Video className="w-3.5 h-3.5 text-emerald-400" />
+            {label}
+          </label>
+          {description && (
+            <p className="text-[11px] text-zinc-400 mt-0.5">{description}</p>
+          )}
+        </div>
+        <span className="text-[10px] text-zinc-500 font-mono">
+          MP4, WebM, MOV · Max 100MB
+        </span>
+      </div>
+
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => {
+            onChange(e.target.value);
+            setVideoError(false);
+          }}
+          placeholder="https://... or /uploads/nxtgen_..."
+          className="flex-1 px-3.5 py-2.5 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white font-mono placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500 transition-colors"
+        />
+
+        <div className="flex items-center gap-2 shrink-0">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="video/mp4,video/webm,video/ogg,video/quicktime,video/*"
+            onChange={handleFileChange}
+            className="hidden"
+            disabled={uploading}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold transition-all shadow-md shadow-emerald-500/15 cursor-pointer disabled:opacity-50 select-none whitespace-nowrap"
+          >
+            {uploading ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>Uploading...</span>
+              </>
+            ) : (
+              <>
+                <UploadCloud className="w-3.5 h-3.5" />
+                <span>Upload Video</span>
+              </>
+            )}
+          </button>
+
+          {value && (
+            <button
+              type="button"
+              onClick={() => onChange('')}
+              title="Clear video URL"
+              className="p-2.5 rounded-xl bg-zinc-950/80 hover:bg-rose-500/20 text-zinc-400 hover:text-rose-400 border border-white/10 transition-colors cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Live Video Preview Player */}
+      {value ? (
+        <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black/90">
+          <div className="absolute top-2.5 left-2.5 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/10 text-[10px] text-zinc-300 font-medium pointer-events-none">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Live Preview
+          </div>
+          <video
+            key={value}
+            src={value}
+            controls
+            muted
+            loop
+            playsInline
+            onError={() => setVideoError(true)}
+            className="w-full h-44 sm:h-52 object-cover bg-black"
+          />
+          {videoError && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 p-4 text-center">
+              <Film className="w-8 h-8 text-rose-400/80 mb-2" />
+              <p className="text-xs font-semibold text-rose-300">Unable to play video preview</p>
+              <p className="text-[11px] text-zinc-400 mt-1 max-w-xs">
+                Check that the video file exists and is accessible.
+              </p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="rounded-xl border border-dashed border-white/10 p-4 text-center bg-white/[0.01]">
+          <Film className="w-5 h-5 text-zinc-600 mx-auto mb-1.5" />
+          <p className="text-xs text-zinc-400 font-medium">No custom video configured</p>
+          <p className="text-[10px] text-zinc-600 mt-0.5">
+            Default fallback video from CDN will be used on the public page.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const SettingsCmsTab: React.FC<SettingsCmsTabProps> = ({
   settings,
@@ -43,6 +205,7 @@ export const SettingsCmsTab: React.FC<SettingsCmsTabProps> = ({
     about_heading_italic2: settings.about_heading_italic2 || 'innovate, scale, and lead.',
     about_approach_text: settings.about_approach_text || 'We believe in the power of cutting-edge technology.',
     about_video_url: settings.about_video_url || 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260402_054547_9875cfc5-155a-4229-8ec8-b7ba7125cbf8.mp4',
+    philosophy_video_url: settings.philosophy_video_url || 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4',
     contact_email: settings.contact_email || 'hello@nxtgen.studio',
     contact_phone: settings.contact_phone || '+63 917 123 4567',
     headquarters_line1: settings.headquarters_line1 || 'Cauayan City,',
@@ -58,7 +221,7 @@ export const SettingsCmsTab: React.FC<SettingsCmsTabProps> = ({
     default_og_image: settings.default_og_image || '/assets/sitelogo.webp',
   });
 
-  const [activeCategory, setActiveCategory] = useState<'general' | 'hero' | 'about' | 'contact' | 'social' | 'seo'>('general');
+  const [activeCategory, setActiveCategory] = useState<'general' | 'videos' | 'hero' | 'about' | 'contact' | 'social' | 'seo'>('general');
   const [saving, setSaving] = useState(false);
 
   const handleChange = (key: string, value: string) => {
@@ -81,6 +244,7 @@ export const SettingsCmsTab: React.FC<SettingsCmsTabProps> = ({
 
   const navCategories = [
     { id: 'general', label: 'Identity & Brand', icon: Globe },
+    { id: 'videos', label: 'Background Videos', icon: Video },
     { id: 'hero', label: 'Hero Section', icon: Film },
     { id: 'about', label: 'About Section', icon: Sparkles },
     { id: 'contact', label: 'Contact & Location', icon: Phone },
@@ -208,6 +372,47 @@ export const SettingsCmsTab: React.FC<SettingsCmsTabProps> = ({
           </div>
         )}
 
+        {/* Category: Background Videos */}
+        {activeCategory === 'videos' && (
+          <div className="space-y-6 animate-in fade-in">
+            <div className="border-b border-white/10 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <Video className="w-5 h-5 text-emerald-400" />
+                  Background Videos & Showcases
+                </h3>
+                <p className="text-xs text-zinc-400 mt-1">
+                  Upload video files directly (MP4, WebM, MOV up to 100MB) or provide external CDN video URLs.
+                </p>
+              </div>
+            </div>
+
+            <VideoUploadField
+              label="Homepage Hero Looping Video"
+              description="Plays continuously in the background behind the main hero banner and navigation."
+              value={formData.hero_video_url}
+              onChange={(val) => handleChange('hero_video_url', val)}
+              showToast={showToast}
+            />
+
+            <VideoUploadField
+              label="About Section Showcase Video"
+              description="Displays in the large cinematic widescreen container below the About Us introduction."
+              value={formData.about_video_url}
+              onChange={(val) => handleChange('about_video_url', val)}
+              showToast={showToast}
+            />
+
+            <VideoUploadField
+              label="Philosophy Section Video (Innovation x Vision)"
+              description="Plays alongside the Tech meets Design and Agile & Scalable philosophy pillars."
+              value={formData.philosophy_video_url}
+              onChange={(val) => handleChange('philosophy_video_url', val)}
+              showToast={showToast}
+            />
+          </div>
+        )}
+
         {/* Category: Hero */}
         {activeCategory === 'hero' && (
           <div className="space-y-5 animate-in fade-in">
@@ -265,17 +470,13 @@ export const SettingsCmsTab: React.FC<SettingsCmsTabProps> = ({
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                Hero Background Video (MP4 URL)
-              </label>
-              <input
-                type="text"
-                value={formData.hero_video_url}
-                onChange={(e) => handleChange('hero_video_url', e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-white/10 text-sm text-white font-mono focus:outline-none focus:border-emerald-500"
-              />
-            </div>
+            <VideoUploadField
+              label="Hero Background Video"
+              description="High-definition looping video behind the hero banner."
+              value={formData.hero_video_url}
+              onChange={(val) => handleChange('hero_video_url', val)}
+              showToast={showToast}
+            />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -312,30 +513,16 @@ export const SettingsCmsTab: React.FC<SettingsCmsTabProps> = ({
               About & Philosophy Section
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  About Badge Tagline
-                </label>
-                <input
-                  type="text"
-                  value={formData.about_tagline}
-                  onChange={(e) => handleChange('about_tagline', e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-white/10 text-sm text-white focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  About Video URL
-                </label>
-                <input
-                  type="text"
-                  value={formData.about_video_url}
-                  onChange={(e) => handleChange('about_video_url', e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-white/10 text-sm text-white font-mono focus:outline-none focus:border-emerald-500"
-                />
-              </div>
+            <div>
+              <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
+                About Badge Tagline
+              </label>
+              <input
+                type="text"
+                value={formData.about_tagline}
+                onChange={(e) => handleChange('about_tagline', e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-white/10 text-sm text-white focus:outline-none focus:border-emerald-500"
+              />
             </div>
 
             <div>
@@ -349,6 +536,22 @@ export const SettingsCmsTab: React.FC<SettingsCmsTabProps> = ({
                 className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-white/10 text-sm text-white focus:outline-none focus:border-emerald-500"
               />
             </div>
+
+            <VideoUploadField
+              label="About Showcase Video"
+              description="Large cinematic video container featured in About section."
+              value={formData.about_video_url}
+              onChange={(val) => handleChange('about_video_url', val)}
+              showToast={showToast}
+            />
+
+            <VideoUploadField
+              label="Philosophy Section Video (Innovation x Vision)"
+              description="Background video playing in the Innovation x Vision card."
+              value={formData.philosophy_video_url}
+              onChange={(val) => handleChange('philosophy_video_url', val)}
+              showToast={showToast}
+            />
           </div>
         )}
 

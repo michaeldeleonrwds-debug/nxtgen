@@ -7,7 +7,7 @@
     "dev": "concurrently -k -p \"[{name}]\" -n \"PHP,VITE\" -c \"magenta.bold,cyan.bold\" \"npm run php:serve\" \"vite\"",
     "dev:vite": "vite",
     "dev:all": "concurrently -k -p \"[{name}]\" -n \"PHP,VITE\" -c \"magenta.bold,cyan.bold\" \"npm run php:serve\" \"vite\"",
-    "php:serve": "php -S 127.0.0.1:8000 api/index.php",
+    "php:serve": "php -d upload_max_filesize=128M -d post_max_size=128M -d memory_limit=256M -S 127.0.0.1:8000 api/index.php",
     "server:node": "node server/server.js",
     "build": "tsc -b && vite build",
     "lint": "eslint .",

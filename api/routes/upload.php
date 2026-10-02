@@ -18,19 +18,32 @@ function handleUpload(): void {
     $file = $_FILES['file'];
 
     if ($file['error'] !== UPLOAD_ERR_OK) {
-        jsonError("File upload error code: {$file['error']}", 400);
+        $msg = "File upload failed with error code: {$file['error']}";
+        if ($file['error'] === UPLOAD_ERR_INI_SIZE || $file['error'] === UPLOAD_ERR_FORM_SIZE) {
+            $msg = 'File size exceeds server upload limit (php.ini upload_max_filesize).';
+        } elseif ($file['error'] === UPLOAD_ERR_PARTIAL) {
+            $msg = 'File was only partially uploaded.';
+        } elseif ($file['error'] === UPLOAD_ERR_NO_FILE) {
+            $msg = 'No file was uploaded.';
+        }
+        jsonError($msg, 400);
     }
 
-    // Maximum file size: 12MB
-    if ($file['size'] > 12 * 1024 * 1024) {
-        jsonError('File size exceeds 12MB limit.', 400);
+    @ini_set('upload_max_filesize', '128M');
+    @ini_set('post_max_size', '128M');
+    @ini_set('memory_limit', '256M');
+    @ini_set('max_execution_time', '300');
+
+    // Maximum file size: 100MB for media and background videos
+    if ($file['size'] > 100 * 1024 * 1024) {
+        jsonError('File size exceeds 100MB limit.', 400);
     }
 
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    $allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg', 'mp4', 'ico'];
+    $allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg', 'mp4', 'webm', 'mov', 'ogg', 'm4v', 'ico'];
 
     if (!in_array($ext, $allowedExts, true)) {
-        jsonError('Invalid file type. Allowed: jpg, jpeg, png, webp, gif, svg, mp4, ico.', 400);
+        jsonError('Invalid file type. Allowed: jpg, jpeg, png, webp, gif, svg, mp4, webm, mov, ogg, m4v, ico.', 400);
     }
 
     // Generate safe unique filename
