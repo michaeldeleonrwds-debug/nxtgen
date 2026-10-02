@@ -44,7 +44,7 @@ const teamAvatarPresets: Record<string, { image: string; bio: string; skills: st
   'michael de leon': {
     image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
     bio: 'Architecting distributed platforms, cloud-native backend engines, and reactive frontend experiences. Focused on low-latency systems and database performance.',
-    skills: ['System Architecture', 'React & TypeScript', 'MariaDB / MySQL', 'Nginx & Linux', 'PHP 8.5+ & Node.js'],
+    skills: ['System Architecture', 'React & TypeScript', 'MariaDB / MySQL', 'Apache & Linux', 'PHP 8.5+ & Node.js'],
     quote: 'Architecture is not just how components connect, but how gracefully they endure scale.',
   },
   'mc denver alba': {

@@ -990,7 +990,7 @@ const PremiumFooter = ({
     { name: "AWS", mark: "aws" }, { name: "Cloudflare", slug: "cloudflare" },
     { name: "Vercel", slug: "vercel" }, { name: "Docker", slug: "docker" },
     { name: "GitHub", slug: "github" }, { name: "Git", slug: "git" },
-    { name: "Linux", slug: "linux" }, { name: "Nginx", slug: "nginx" }
+    { name: "Linux", slug: "linux" }, { name: "Apache", slug: "apache" }
   ];
 
   const ideas = (dynamicIdeas && dynamicIdeas.length > 0)

@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "dev:all": "concurrently \"npm run php:serve\" \"vite\"",
+    "dev": "concurrently -k -p \"[{name}]\" -n \"PHP,VITE\" -c \"magenta.bold,cyan.bold\" \"npm run php:serve\" \"vite\"",
+    "dev:vite": "vite",
+    "dev:all": "concurrently -k -p \"[{name}]\" -n \"PHP,VITE\" -c \"magenta.bold,cyan.bold\" \"npm run php:serve\" \"vite\"",
     "php:serve": "php -S 127.0.0.1:8000 api/index.php",
     "server:node": "node server/server.js",
     "build": "tsc -b && vite build",
