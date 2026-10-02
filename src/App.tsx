@@ -248,12 +248,6 @@ const globalCss = `
       mask-composite: exclude; 
       pointer-events: none; 
     }
-
-    @media (min-width: 640px) {
-      .footer-panel::before {
-        display: none;
-      }
-    }
   }
 `;
 
@@ -1506,8 +1500,8 @@ const PremiumFooter = ({
       </div>
 
       {/* 8. Minimal Navigation & Location */}
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-x-16 sm:gap-y-14 lg:gap-12 text-sm text-white/55 mb-12 sm:mb-32">
-        <div className="footer-panel liquid-glass rounded-2xl p-5 sm:p-0 sm:bg-transparent sm:backdrop-blur-0 sm:shadow-none sm:border-0 flex flex-col gap-4">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-x-16 sm:gap-y-14 lg:gap-12 text-sm text-white/55 mb-12 sm:mb-32">
+        <div className="flex flex-col gap-4">
           <span className="text-white uppercase tracking-[0.22em] text-xs mb-1 sm:mb-3">Navigation</span>
           <a href="#about" className="hover:text-white transition-colors">About</a>
           <a href="#services" className="hover:text-white transition-colors">Services</a>
@@ -1528,7 +1522,7 @@ const PremiumFooter = ({
           <a href="#about" className="hover:text-white transition-colors">Blog</a>
           <a href="#contact" className="hover:text-white transition-colors">Contact</a>
         </div>
-        <div className="footer-panel liquid-glass rounded-2xl p-5 sm:p-0 sm:bg-transparent sm:backdrop-blur-0 sm:shadow-none sm:border-0 flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
           <span className="text-white uppercase tracking-[0.22em] text-xs mb-1 sm:mb-3">Social</span>
           <a href="#" className="hover:text-white transition-colors flex items-center justify-between sm:justify-start gap-2">Instagram <ArrowUpRight className="w-3 h-3"/></a>
           <a href="#" className="hover:text-white transition-colors flex items-center justify-between sm:justify-start gap-2">LinkedIn <ArrowUpRight className="w-3 h-3"/></a>
@@ -1536,13 +1530,13 @@ const PremiumFooter = ({
           <a href="#" className="hover:text-white transition-colors flex items-center justify-between sm:justify-start gap-2">GitHub <ArrowUpRight className="w-3 h-3"/></a>
           <a href="#" className="hover:text-white transition-colors flex items-center justify-between sm:justify-start gap-2">YouTube <ArrowUpRight className="w-3 h-3"/></a>
         </div>
-        <div className="footer-panel liquid-glass rounded-2xl p-5 sm:p-0 sm:bg-transparent sm:backdrop-blur-0 sm:shadow-none sm:border-0 flex flex-col gap-4 sm:col-span-2 lg:col-span-2 lg:text-right">
+        <div className="flex flex-col gap-4 sm:col-span-2 lg:col-span-2 lg:text-right">
           <span className="text-white uppercase tracking-[0.22em] text-xs mb-1 sm:mb-3">Headquarters</span>
           <p className="leading-relaxed">
             {settings?.headquarters_line1 || 'Cauayan City,'}<br/>
             {settings?.headquarters_line2 || 'Cagayan Valley, Philippines'}
           </p>
-          <div className="mt-auto pt-6 sm:pt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 lg:justify-end text-xs text-white/35">
+          <div className="mt-auto pt-6 sm:pt-8 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 lg:justify-end text-xs text-white/35">
             <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
             <span>&copy; {new Date().getFullYear()} {settings?.footer_brand_text || 'NXTGEN'} Company.</span>
