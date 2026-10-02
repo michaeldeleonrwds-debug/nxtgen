@@ -1379,11 +1379,46 @@ const PremiumFooter = ({
         </div>
       </div>
 
-      {/* 9. Final Brand Statement */}
-      <div className="w-full overflow-hidden border-t border-white/5 pt-8 sm:pt-10 px-5 sm:px-6">
-        <p className="text-center text-[clamp(4.4rem,22vw,18rem)] leading-none font-bold tracking-tight text-white/10 sm:text-white/5 whitespace-nowrap select-none" aria-hidden="true">
+      {/* 9. Final Brand Statement with Glowing Animation */}
+      <div className="w-full overflow-hidden border-t border-white/5 pt-8 sm:pt-10 pb-4 px-5 sm:px-6 relative flex items-center justify-center">
+        {/* Soft Ambient Radial Backlight Glow */}
+        <motion.div
+          animate={{
+            opacity: [0.12, 0.35, 0.12],
+            scale: [0.95, 1.08, 0.95],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute w-[min(90vw,700px)] h-36 bg-emerald-500/20 blur-[100px] rounded-full pointer-events-none -bottom-6"
+        />
+
+        {/* Pulsing Luminous Brand Text */}
+        <motion.p
+          animate={{
+            textShadow: [
+              "0 0 15px rgba(16, 185, 129, 0.08), 0 0 30px rgba(16, 185, 129, 0.03)",
+              "0 0 30px rgba(16, 185, 129, 0.35), 0 0 60px rgba(16, 185, 129, 0.18), 0 0 90px rgba(16, 185, 129, 0.08)",
+              "0 0 15px rgba(16, 185, 129, 0.08), 0 0 30px rgba(16, 185, 129, 0.03)",
+            ],
+            color: [
+              "rgba(255, 255, 255, 0.07)",
+              "rgba(255, 255, 255, 0.22)",
+              "rgba(255, 255, 255, 0.07)",
+            ],
+          }}
+          transition={{
+            duration: 3.8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="relative text-center text-[clamp(4.4rem,22vw,18rem)] leading-none font-bold tracking-tight whitespace-nowrap select-none cursor-default transition-all duration-500 hover:text-white/35 hover:drop-shadow-[0_0_40px_rgba(52,211,153,0.5)]"
+          aria-hidden="true"
+        >
           {settings?.footer_brand_text || 'NXTGEN'}
-        </p>
+        </motion.p>
       </div>
       
     </footer>
