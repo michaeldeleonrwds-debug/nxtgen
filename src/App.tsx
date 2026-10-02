@@ -7,6 +7,8 @@ import {
   Send,
   CheckCircle2,
   AlertCircle,
+  Menu,
+  X,
 } from 'lucide-react';
 import webMobileImage from './assets/web-mobile.webp';
 import cmsNoCodeImage from './assets/CMS & No code.webp';
@@ -168,6 +170,7 @@ const HeroSection = ({
   onOpenProjects?: () => void;
   onOpenTeam?: () => void;
 }) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const fadeState = useRef<'idle' | 'fadingIn' | 'fadingOut'>('idle');
 
@@ -285,8 +288,88 @@ const HeroSection = ({
             >
               Contact Us
             </a>
+
+            {/* Mobile Hamburger / Burger Bar Button */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden liquid-glass rounded-full w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-white/90 hover:text-white hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+              aria-label={mobileMenuOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Navigation Dropdown Drawer */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              className="md:hidden max-w-5xl mx-auto mt-2.5 p-4 liquid-glass rounded-2xl border border-white/10 bg-black/95 backdrop-blur-2xl shadow-2xl flex flex-col gap-1 relative z-40"
+            >
+              <a
+                href="#features"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <span>Features</span>
+                <ArrowRight className="w-4 h-4 text-white/30" />
+              </a>
+              <a
+                href="#services"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <span>Services</span>
+                <ArrowRight className="w-4 h-4 text-white/30" />
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenProjects?.();
+                }}
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition-colors text-left cursor-pointer w-full"
+              >
+                <span>Work (Projects)</span>
+                <ArrowRight className="w-4 h-4 text-white/30" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenTeam?.();
+                }}
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition-colors text-left cursor-pointer w-full"
+              >
+                <span>Engineering & Design Team</span>
+                <ArrowRight className="w-4 h-4 text-white/30" />
+              </button>
+              <a
+                href="#about"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <span>About</span>
+                <ArrowRight className="w-4 h-4 text-white/30" />
+              </a>
+              <div className="pt-2 mt-1 border-t border-white/10">
+                <a
+                  href="#contact-form"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-white/90 transition-colors"
+                >
+                  Start a Project
+                </a>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* Hero Content */}

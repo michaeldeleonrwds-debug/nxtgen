@@ -2,9 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
+  ArrowRight,
   ArrowUpRight,
   Code2,
   Layers,
+  Menu,
+  X,
 } from 'lucide-react';
 import siteLogo from '../assets/sitelogo.webp';
 import wallpaperImage from '../assets/Wallpaper.webp';
@@ -147,6 +150,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
   onBackToHome,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   // Derive unique categories
   const categories = useMemo(() => {
@@ -168,7 +172,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
   return (
     <div className="bg-black text-white min-h-screen selection:bg-white/30 selection:text-white relative">
       {/* Header / Navbar */}
-      <nav className="relative z-20 px-4 sm:px-6 py-4 sm:py-6 w-full">
+      <nav className="relative z-30 px-4 sm:px-6 py-4 sm:py-6 w-full">
         <div className="liquid-glass rounded-2xl sm:rounded-full max-w-5xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex justify-between items-center gap-3">
           <div className="flex items-center gap-4">
             <button
@@ -183,7 +187,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={onBackToHome}
               className="liquid-glass rounded-full px-4 sm:px-5 py-2 text-white text-xs sm:text-sm font-medium hover:bg-white/10 transition-all flex items-center gap-1.5 cursor-pointer"
@@ -197,8 +201,86 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
             >
               Contact Us
             </a>
+
+            {/* Mobile Hamburger / Burger Bar Button */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden liquid-glass rounded-full w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-white/90 hover:text-white hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+              aria-label={mobileMenuOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Navigation Dropdown Drawer */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              className="md:hidden max-w-5xl mx-auto mt-2.5 p-4 liquid-glass rounded-2xl border border-white/10 bg-black/95 backdrop-blur-2xl shadow-2xl flex flex-col gap-1 relative z-40"
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onBackToHome();
+                }}
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition-colors text-left cursor-pointer w-full"
+              >
+                <span>Home Page</span>
+                <ArrowRight className="w-4 h-4 text-white/30" />
+              </button>
+              <a
+                href="/team"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <span>Engineering & Design Team</span>
+                <ArrowRight className="w-4 h-4 text-white/30" />
+              </a>
+              <a
+                href="/#services"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onBackToHome();
+                }}
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <span>Services</span>
+                <ArrowRight className="w-4 h-4 text-white/30" />
+              </a>
+              <a
+                href="/#features"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onBackToHome();
+                }}
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <span>Features</span>
+                <ArrowRight className="w-4 h-4 text-white/30" />
+              </a>
+              <div className="pt-2 mt-1 border-t border-white/10">
+                <a
+                  href="/#contact-form"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onBackToHome();
+                  }}
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-white/90 transition-colors"
+                >
+                  Start a Project
+                </a>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* Hero Showcase Header */}
