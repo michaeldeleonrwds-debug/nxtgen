@@ -1564,7 +1564,81 @@ const PremiumFooter = ({
   );
 };
 
+const LOADING_LETTERS = ['N', 'X', 'T', 'G', 'E', 'N'];
+
+function LoadingScreen() {
+  return (
+    <motion.div
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 1.02, filter: 'blur(10px)' }}
+      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+      className="fixed inset-0 z-[99999] bg-black flex flex-col items-center justify-center select-none overflow-hidden"
+    >
+      {/* Soft Ambient Radial White Backlight */}
+      <motion.div
+        animate={{
+          opacity: [0.12, 0.32, 0.12],
+          scale: [0.92, 1.08, 0.92],
+        }}
+        transition={{
+          duration: 2.4,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="absolute w-[min(90vw,540px)] h-48 bg-white/10 blur-[100px] rounded-full pointer-events-none"
+      />
+
+      {/* Animated Letters: N X T G E N */}
+      <div className="relative flex items-center justify-center gap-3 sm:gap-6 md:gap-8">
+        {LOADING_LETTERS.map((char, i) => (
+          <motion.span
+            key={i}
+            className="font-bold text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight text-white inline-block font-sans"
+            animate={{
+              opacity: [0.15, 1, 0.15],
+              y: [3, -12, 3],
+              scale: [0.94, 1.07, 0.94],
+              textShadow: [
+                "0 0 0px rgba(255,255,255,0)",
+                "0 0 16px rgba(255,255,255,0.95), 0 0 40px rgba(255,255,255,0.65), 0 0 75px rgba(255,255,255,0.35)",
+                "0 0 0px rgba(255,255,255,0)",
+              ],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: i * 0.14,
+            }}
+          >
+            {char}
+          </motion.span>
+        ))}
+      </div>
+
+      {/* Modern High-End Loading Beam */}
+      <div className="relative mt-8 sm:mt-10 w-36 sm:w-48 h-[2px] bg-white/10 rounded-full overflow-hidden">
+        <motion.div
+          className="absolute top-0 bottom-0 w-1/2 bg-white rounded-full shadow-[0_0_12px_#ffffff]"
+          animate={{ x: ["-100%", "200%"] }}
+          transition={{
+            duration: 1.3,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      </div>
+
+      {/* Subtext */}
+      <p className="mt-4 text-[10px] sm:text-xs font-mono uppercase tracking-[0.3em] text-white/35">
+        Loading Assets
+      </p>
+    </motion.div>
+  );
+}
+
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'website' | 'projects' | 'team' | 'admin'>('website');
   const [siteData, setSiteData] = useState<{
     settings?: Record<string, string>;
@@ -1582,6 +1656,83 @@ export default function App() {
       })
       .catch((err) => console.warn('Using default content:', err));
   };
+
+  useEffect(() => {
+    let isMounted = true;
+    const startTime = Date.now();
+    const minDisplayMs = 1200; // Guarantees smooth cinematic transition without jarring flash
+
+    // 1. Wait for window load (all assets, fonts, stylesheets downloaded)
+    const windowLoadPromise = new Promise<void>((resolve) => {
+      if (document.readyState === 'complete') {
+        resolve();
+      } else {
+        const onWindowLoad = () => {
+          window.removeEventListener('load', onWindowLoad);
+          resolve();
+        };
+        window.addEventListener('load', onWindowLoad);
+      }
+    });
+
+    // 2. Preload primary critical imagery
+    const criticalImages = [
+      siteLogo,
+      webMobileImage,
+      cmsNoCodeImage,
+      arduinoIotImage,
+      designBrandingImage,
+    ];
+    const imagePreloadPromise = Promise.all(
+      criticalImages.map(
+        (src) =>
+          new Promise<void>((resolve) => {
+            const img = new Image();
+            img.src = src;
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+          })
+      )
+    );
+
+    // 3. Preload CMS content data
+    const dataPromise = fetchPublicContent()
+      .then((data) => {
+        if (data && isMounted) setSiteData(data);
+      })
+      .catch((err) => console.warn('Using default content:', err));
+
+    // When all assets + data + min display duration complete
+    Promise.all([windowLoadPromise, imagePreloadPromise, dataPromise]).then(() => {
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, minDisplayMs - elapsed);
+      setTimeout(() => {
+        if (isMounted) setIsLoading(false);
+      }, remaining);
+    });
+
+    // Safety fallback: maximum 3.5s so slow network never leaves user stuck
+    const safetyTimer = setTimeout(() => {
+      if (isMounted) setIsLoading(false);
+    }, 3500);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(safetyTimer);
+    };
+  }, []);
+
+  // Lock body scroll while initial loading screen is active
+  useEffect(() => {
+    if (isLoading) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isLoading]);
 
   useEffect(() => {
     const resolveView = (): 'website' | 'projects' | 'team' | 'admin' => {
@@ -1608,7 +1759,6 @@ export default function App() {
 
     window.addEventListener('hashchange', handleRoute);
     window.addEventListener('popstate', handleRoute);
-    loadData();
 
     return () => {
       window.removeEventListener('hashchange', handleRoute);
@@ -1637,62 +1787,58 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  if (viewMode === 'admin') {
-    return (
-      <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-zinc-500 text-xs">Loading Admin...</div>}>
-        <AdminPanel onViewPublicSite={handleOpenWebsite} />
-      </Suspense>
-    );
-  }
-
-  if (viewMode === 'projects') {
-    return (
-      <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-zinc-500 text-xs">Loading Projects...</div>}>
-        <ProjectsPage
-          projects={siteData.projects || []}
-          settings={siteData.settings}
-          onBackToHome={handleOpenWebsite}
-        />
-      </Suspense>
-    );
-  }
-
-  if (viewMode === 'team') {
-    return (
-      <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-zinc-500 text-xs">Loading Team...</div>}>
-        <TeamPage
-          team={siteData.team || []}
-          settings={siteData.settings}
-          onBackToHome={handleOpenWebsite}
-        />
-      </Suspense>
-    );
-  }
-
   return (
-    <div className="bg-black text-white min-h-screen selection:bg-white/30 selection:text-white relative">
-      <style dangerouslySetInnerHTML={{ __html: globalCss }} />
-      <HeroSection
-        settings={siteData.settings}
-        onOpenProjects={handleOpenProjects}
-        onOpenTeam={handleOpenTeam}
-      />
-      <AboutSection settings={siteData.settings} />
-      <FeaturedVideoSection settings={siteData.settings} />
-      <PhilosophySection settings={siteData.settings} />
-      <ServicesSection dynamicServices={siteData.services} />
-      <ProjectsSection
-        dynamicProjects={siteData.projects}
-        onOpenProjects={handleOpenProjects}
-      />
-      <ClientReviewsSection dynamicReviews={siteData.reviews} />
-      <PremiumFooter
-        dynamicTeam={siteData.team}
-        dynamicIdeas={siteData.ideas}
-        settings={siteData.settings}
-        onOpenProjects={handleOpenProjects}
-        onOpenTeam={handleOpenTeam}
-      />
-    </div>
+    <>
+      <AnimatePresence mode="wait">
+        {isLoading && <LoadingScreen />}
+      </AnimatePresence>
+
+      {viewMode === 'admin' ? (
+        <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-zinc-500 text-xs">Loading Admin...</div>}>
+          <AdminPanel onViewPublicSite={handleOpenWebsite} />
+        </Suspense>
+      ) : viewMode === 'projects' ? (
+        <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-zinc-500 text-xs">Loading Projects...</div>}>
+          <ProjectsPage
+            projects={siteData.projects || []}
+            settings={siteData.settings}
+            onBackToHome={handleOpenWebsite}
+          />
+        </Suspense>
+      ) : viewMode === 'team' ? (
+        <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-zinc-500 text-xs">Loading Team...</div>}>
+          <TeamPage
+            team={siteData.team || []}
+            settings={siteData.settings}
+            onBackToHome={handleOpenWebsite}
+          />
+        </Suspense>
+      ) : (
+        <div className="bg-black text-white min-h-screen selection:bg-white/30 selection:text-white relative">
+          <style dangerouslySetInnerHTML={{ __html: globalCss }} />
+          <HeroSection
+            settings={siteData.settings}
+            onOpenProjects={handleOpenProjects}
+            onOpenTeam={handleOpenTeam}
+          />
+          <AboutSection settings={siteData.settings} />
+          <FeaturedVideoSection settings={siteData.settings} />
+          <PhilosophySection settings={siteData.settings} />
+          <ServicesSection dynamicServices={siteData.services} />
+          <ProjectsSection
+            dynamicProjects={siteData.projects}
+            onOpenProjects={handleOpenProjects}
+          />
+          <ClientReviewsSection dynamicReviews={siteData.reviews} />
+          <PremiumFooter
+            dynamicTeam={siteData.team}
+            dynamicIdeas={siteData.ideas}
+            settings={siteData.settings}
+            onOpenProjects={handleOpenProjects}
+            onOpenTeam={handleOpenTeam}
+          />
+        </div>
+      )}
+    </>
   );
 }
