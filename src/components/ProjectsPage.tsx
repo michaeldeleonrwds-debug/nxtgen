@@ -4,142 +4,20 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUpRight,
-  Code2,
   Layers,
   Menu,
   X,
 } from 'lucide-react';
 import siteLogo from '../assets/sitelogo.webp';
-import wallpaperImage from '../assets/Wallpaper.webp';
-import webMobileImage from '../assets/web-mobile.webp';
-import cmsNoCodeImage from '../assets/CMS & No code.webp';
-import arduinoIotImage from '../assets/Arduino & Iot.webp';
-import designBrandingImage from '../assets/Design and Branding.webp';
 import type { ProjectItem } from '../admin/api';
+import { ProjectCard, resolveProjectImage, type ProjectCardProps } from './ProjectCard';
+export { ProjectCard, resolveProjectImage, type ProjectCardProps };
 
 export interface ProjectsPageProps {
   projects: ProjectItem[];
   settings?: Record<string, string>;
   onBackToHome: () => void;
 }
-
-export const resolveProjectImage = (url?: string, category?: string) => {
-  if (url && (url.startsWith('http') || url.startsWith('/uploads'))) return url;
-  if (url && url.includes('web-mobile')) return webMobileImage;
-  if (url && url.includes('CMS')) return cmsNoCodeImage;
-  if (url && url.includes('Arduino')) return arduinoIotImage;
-  if (url && url.includes('Design')) return designBrandingImage;
-
-  // Fallback based on category
-  const cat = (category || '').toLowerCase();
-  if (cat.includes('full stack') || cat.includes('cloud')) return webMobileImage;
-  if (cat.includes('web application') || cat.includes('platform')) return cmsNoCodeImage;
-  if (cat.includes('design') || cat.includes('ui')) return designBrandingImage;
-  if (cat.includes('tooling') || cat.includes('iot')) return arduinoIotImage;
-
-  return wallpaperImage;
-};
-
-export interface ProjectCardProps {
-  project: ProjectItem;
-  index: number;
-}
-
-export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index }) => {
-  const bgImg = resolveProjectImage(project.image_url, project.category);
-  const tagList = project.tags
-    ? project.tags.split(',').map((t) => t.trim())
-    : [];
-
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay: Math.min(index * 0.05, 0.2), ease: 'easeOut' }}
-      className="liquid-glass rounded-2xl sm:rounded-3xl overflow-hidden border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between group hover:bg-white/[0.04]"
-    >
-      {/* Top Preview Image Container */}
-      <div className="relative aspect-[16/10] overflow-hidden bg-zinc-950">
-        <img
-          src={bgImg}
-          alt={project.title}
-          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 opacity-80 group-hover:opacity-100"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-
-        {/* Category & Status Overlay */}
-        <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
-          <span className="liquid-glass text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider text-white/90">
-            {project.category}
-          </span>
-
-          <span className="liquid-glass text-xs font-medium px-3 py-1 rounded-full text-white/70">
-            {project.status}
-          </span>
-        </div>
-
-        {/* Client attribution if present */}
-        {project.client && (
-          <div className="absolute bottom-4 left-4">
-            <span className="text-xs font-medium text-white/70 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
-              Client: {project.client}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Body Content */}
-      <div className="p-6 sm:p-8 flex flex-col flex-1 justify-between space-y-6">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight group-hover:text-white/90 transition-colors">
-            {project.title}
-          </h2>
-          <p className="text-white/60 text-sm leading-relaxed mt-3">
-            {project.description}
-          </p>
-        </div>
-
-        {/* Tech Stack Pills & Link Footer */}
-        <div className="space-y-4 pt-4 border-t border-white/10">
-          {tagList.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {tagList.map((tag, tIdx) => (
-                <span
-                  key={tIdx}
-                  className="text-xs px-2.5 py-1 rounded-lg bg-white/5 border border-white/5 text-white/70 font-mono"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-
-          <div className="flex items-center justify-between pt-2">
-            {project.demo_url && project.demo_url !== '#' ? (
-              <a
-                href={project.demo_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-white/80 hover:text-white transition-colors group/link"
-              >
-                <span>Explore Deliverable</span>
-                <ArrowUpRight className="w-4 h-4 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
-              </a>
-            ) : (
-              <span className="text-xs text-white/40 flex items-center gap-1.5">
-                <Code2 className="w-3.5 h-3.5" /> Internal Architecture
-              </span>
-            )}
-
-            <span className="text-xs text-white/30 font-mono">
-              #{String(index + 1).padStart(2, '0')}
-            </span>
-          </div>
-        </div>
-      </div>
-    </motion.article>
-  );
-};
 
 export const ProjectsPage: React.FC<ProjectsPageProps> = ({
   projects,

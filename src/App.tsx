@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, type SVGProps } from 'react';
+import { useRef, useEffect, useState, lazy, Suspense, type SVGProps } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import {
   Globe,
@@ -15,15 +15,13 @@ import cmsNoCodeImage from './assets/CMS & No code.webp';
 import arduinoIotImage from './assets/Arduino & Iot.webp';
 import designBrandingImage from './assets/Design and Branding.webp';
 import siteLogo from './assets/sitelogo.webp';
-import { AdminPanel } from './admin/AdminPanel';
-import {
-  ProjectsPage,
-  ProjectCard,
-} from './components/ProjectsPage';
-import {
-  TeamPage,
-  resolveTeamMemberMedia,
-} from './components/TeamPage';
+import { ProjectCard } from './components/ProjectCard';
+import { resolveTeamMemberMedia } from './components/teamMedia';
+
+// Lazy-load subpages and Admin CMS for performance
+const AdminPanel = lazy(() => import('./admin/AdminPanel').then((m) => ({ default: m.AdminPanel })));
+const ProjectsPage = lazy(() => import('./components/ProjectsPage').then((m) => ({ default: m.ProjectsPage })));
+const TeamPage = lazy(() => import('./components/TeamPage').then((m) => ({ default: m.TeamPage })));
 import {
   fetchPublicContent,
   submitInquiry,
@@ -43,8 +41,6 @@ const resolveServiceImage = (url?: string) => {
 };
 
 const globalCss = `
-  @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
-
   body {
     background-color: black;
     color: white;
@@ -237,7 +233,7 @@ const HeroSection = ({
         muted
         autoPlay
         playsInline
-        preload="auto"
+        preload="metadata"
         style={{ opacity: 0 }}
       />
       
@@ -457,7 +453,7 @@ const FeaturedVideoSection = ({ settings }: { settings?: Record<string, string> 
           autoPlay
           loop
           playsInline
-          preload="auto"
+          preload="none"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         
@@ -512,6 +508,7 @@ const PhilosophySection = ({ settings }: { settings?: Record<string, string> }) 
               autoPlay
               loop
               playsInline
+              preload="none"
             />
           </motion.div>
           
@@ -1467,26 +1464,34 @@ export default function App() {
   };
 
   if (viewMode === 'admin') {
-    return <AdminPanel onViewPublicSite={handleOpenWebsite} />;
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-zinc-500 text-xs">Loading Admin...</div>}>
+        <AdminPanel onViewPublicSite={handleOpenWebsite} />
+      </Suspense>
+    );
   }
 
   if (viewMode === 'projects') {
     return (
-      <ProjectsPage
-        projects={siteData.projects || []}
-        settings={siteData.settings}
-        onBackToHome={handleOpenWebsite}
-      />
+      <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-zinc-500 text-xs">Loading Projects...</div>}>
+        <ProjectsPage
+          projects={siteData.projects || []}
+          settings={siteData.settings}
+          onBackToHome={handleOpenWebsite}
+        />
+      </Suspense>
     );
   }
 
   if (viewMode === 'team') {
     return (
-      <TeamPage
-        team={siteData.team || []}
-        settings={siteData.settings}
-        onBackToHome={handleOpenWebsite}
-      />
+      <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-zinc-500 text-xs">Loading Team...</div>}>
+        <TeamPage
+          team={siteData.team || []}
+          settings={siteData.settings}
+          onBackToHome={handleOpenWebsite}
+        />
+      </Suspense>
     );
   }
 
