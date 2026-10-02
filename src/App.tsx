@@ -1,5 +1,7 @@
 import { useRef, useEffect, useState, lazy, Suspense, type SVGProps } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
+import Lenis from 'lenis';
+import 'lenis/dist/lenis.css';
 import {
   Globe,
   ArrowRight,
@@ -249,6 +251,30 @@ const globalCss = `
       pointer-events: none; 
     }
   }
+
+  @media (max-width: 1023px) {
+    html {
+      scroll-snap-type: y proximity;
+      scroll-padding-top: 1rem;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .snap-section {
+      scroll-snap-align: start;
+      scroll-snap-stop: normal;
+      scroll-margin-top: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    html {
+      scroll-snap-type: none;
+    }
+    .snap-section {
+      scroll-snap-align: none;
+    }
+  }
 `;
 
 type BrandIconProps = SVGProps<SVGSVGElement>;
@@ -390,7 +416,7 @@ const HeroSection = ({
   }, []);
 
   return (
-    <section className="min-h-svh overflow-hidden relative flex flex-col">
+    <section className="snap-section min-h-svh overflow-hidden relative flex flex-col">
       <video
         ref={videoRef}
         className="absolute inset-0 w-full h-full object-cover object-bottom"
@@ -566,7 +592,7 @@ const AboutSection = ({ settings }: { settings?: Record<string, string> }) => {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section id="about" ref={ref} className="bg-black pt-20 sm:pt-28 lg:pt-44 pb-8 sm:pb-12 lg:pb-14 px-4 sm:px-6 overflow-hidden relative">
+    <section id="about" ref={ref} className="snap-section bg-black pt-12 sm:pt-16 lg:pt-44 pb-6 sm:pb-10 lg:pb-14 px-4 sm:px-6 overflow-hidden relative">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.03)_0%,_transparent_70%)] pointer-events-none" />
       <div className="max-w-6xl mx-auto relative z-10">
         <motion.p 
@@ -603,7 +629,7 @@ const FeaturedVideoSection = ({ settings }: { settings?: Record<string, string> 
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section className="bg-black pt-6 md:pt-10 pb-16 sm:pb-20 lg:pb-32 px-4 sm:px-6 overflow-hidden">
+    <section className="snap-section bg-black pt-4 md:pt-8 pb-12 sm:pb-16 lg:pb-32 px-4 sm:px-6 overflow-hidden">
       <motion.div 
         ref={ref}
         initial={{ opacity: 0, y: 60 }}
@@ -648,7 +674,7 @@ const PhilosophySection = ({ settings }: { settings?: Record<string, string> }) 
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section ref={ref} className="bg-black py-20 sm:py-28 lg:py-40 px-4 sm:px-6 overflow-hidden">
+    <section ref={ref} className="snap-section bg-black py-12 sm:py-16 lg:py-40 px-4 sm:px-6 overflow-hidden">
       <div className="max-w-6xl mx-auto">
         <motion.h2 
           initial={{ opacity: 0, y: 40 }}
@@ -746,7 +772,7 @@ const ServicesSection = ({ dynamicServices }: { dynamicServices?: ServiceItem[] 
     : defaultCards;
 
   return (
-    <section id="services" ref={ref} className="bg-black py-20 sm:py-28 lg:py-40 px-4 sm:px-6 overflow-hidden relative">
+    <section id="services" ref={ref} className="snap-section bg-black py-12 sm:py-16 lg:py-40 px-4 sm:px-6 overflow-hidden relative">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.02)_0%,_transparent_60%)] pointer-events-none" />
       
       <div className="max-w-6xl mx-auto relative z-10">
@@ -861,7 +887,7 @@ const ProjectsSection = ({
       : defaultProjects;
 
   return (
-    <section id="work" ref={ref} className="bg-black py-20 sm:py-28 lg:py-36 px-4 sm:px-6 overflow-hidden relative border-t border-white/5">
+    <section id="work" ref={ref} className="snap-section bg-black py-12 sm:py-16 lg:py-36 px-4 sm:px-6 overflow-hidden relative border-t border-white/5">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.03)_0%,_transparent_70%)] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative z-10">
@@ -963,7 +989,7 @@ const ClientReviewsSection = ({ dynamicReviews }: { dynamicReviews?: ReviewItem[
     : defaultReviews;
 
   return (
-    <section ref={ref} className="bg-black py-20 sm:py-28 lg:py-36 px-4 sm:px-6 overflow-hidden">
+    <section ref={ref} className="snap-section bg-black py-12 sm:py-16 lg:py-36 px-4 sm:px-6 overflow-hidden">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -1176,10 +1202,10 @@ const PremiumFooter = ({
     : defaultTeamList;
 
   return (
-    <footer className="bg-black pt-20 sm:pt-28 lg:pt-48 pb-10 overflow-hidden relative border-t border-white/10">
+    <footer className="snap-section bg-black pt-12 sm:pt-16 lg:pt-48 pb-10 overflow-hidden relative border-t border-white/10">
 
       {/* 1. Particle Fading Dispersal Typography */}
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 mb-20 sm:mb-32 lg:mb-48 h-[220px] sm:h-[200px] lg:h-[220px] flex items-center justify-center text-center relative">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 mb-12 sm:mb-20 lg:mb-48 h-[200px] sm:h-[200px] lg:h-[220px] flex items-center justify-center text-center relative">
         <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.h2
@@ -1243,7 +1269,7 @@ const PremiumFooter = ({
       </div>
 
       {/* Tech Stacks & Marquees Container (Infrastructure First on Top) */}
-      <div className="flex flex-col gap-8 sm:gap-10 mb-20 sm:mb-32 lg:mb-48 border-y border-white/5 py-10 sm:py-16 bg-white/[0.01]">
+      <div className="flex flex-col gap-8 sm:gap-10 mb-12 sm:mb-20 lg:mb-48 border-y border-white/5 py-8 sm:py-12 lg:py-16 bg-white/[0.01]">
         
         {/* 1. Infrastructure - Moves Left (At the Top) */}
         <div className="relative flex flex-col items-start w-full group">
@@ -1331,7 +1357,7 @@ const PremiumFooter = ({
       </div>
 
       {/* Engineering & Design Team Section */}
-      <div id="team" className="max-w-7xl mx-auto px-4 sm:px-6 mb-20 sm:mb-32 lg:mb-40">
+      <div id="team" className="snap-section max-w-7xl mx-auto px-4 sm:px-6 mb-12 sm:mb-20 lg:mb-40">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-10 sm:mb-12">
           <div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl text-white font-medium tracking-tight">
@@ -1398,7 +1424,7 @@ const PremiumFooter = ({
       </div>
 
       {/* 5. Ideas Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-20 sm:mb-32 lg:mb-48">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-12 sm:mb-20 lg:mb-48">
         <p className="text-white/30 text-xs tracking-widest uppercase mb-8 sm:mb-12 text-center">Ideas & Capabilities</p>
         <div className="flex flex-wrap justify-center text-center gap-x-5 sm:gap-x-8 gap-y-3 sm:gap-y-4 md:gap-y-8">
           {ideas.map((idea, i) => (
@@ -1413,7 +1439,7 @@ const PremiumFooter = ({
       </div>
 
       {/* 7. Contact CTA & Dynamic Form */}
-      <div id="contact" className="max-w-7xl mx-auto px-5 sm:px-6 mb-16 sm:mb-32 lg:mb-40 flex flex-col items-center text-center scroll-mt-24">
+      <div id="contact" className="snap-section max-w-7xl mx-auto px-5 sm:px-6 mb-12 sm:mb-20 lg:mb-40 flex flex-col items-center text-center scroll-mt-24">
         <p className="text-white/45 text-xs sm:text-lg md:text-xl mb-3 uppercase tracking-[0.28em]">Have an idea?</p>
         <h2 className="text-5xl sm:text-5xl md:text-7xl lg:text-8xl leading-none font-['Instrument_Serif'] text-white mb-8 sm:mb-10">
           Let's build it.
@@ -1500,7 +1526,7 @@ const PremiumFooter = ({
       </div>
 
       {/* 8. Minimal Navigation & Location */}
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-x-16 sm:gap-y-14 lg:gap-12 text-sm text-white/55 mb-12 sm:mb-32">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-x-16 sm:gap-y-14 lg:gap-12 text-sm text-white/55 mb-10 sm:mb-16 lg:mb-32">
         <div className="flex flex-col gap-4">
           <span className="text-white uppercase tracking-[0.22em] text-xs mb-1 sm:mb-3">Navigation</span>
           <a href="#about" className="hover:text-white transition-colors">About</a>
@@ -1733,6 +1759,50 @@ export default function App() {
       document.body.style.overflow = '';
     };
   }, [isLoading]);
+
+  // Heavy inertia smooth scrolling on desktop (pointer: fine, min-width: 1024px)
+  useEffect(() => {
+    if (viewMode !== 'website' || isLoading) return;
+
+    const isDesktop = window.matchMedia('(min-width: 1024px) and (pointer: fine)').matches;
+    if (!isDesktop) return;
+
+    const lenis = new Lenis({
+      duration: 1.6,       // Weighted glide duration
+      lerp: 0.07,          // Luxury heavy inertia damping
+      wheelMultiplier: 0.85, // Controlled wheel responsiveness for solid mass feel
+      smoothWheel: true,
+      touchMultiplier: 0,  // Native touch gestures preserved for mobile/tablet magnetic snapping
+      infinite: false,
+    });
+
+    let rafId: number;
+    function raf(time: number) {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    }
+    rafId = requestAnimationFrame(raf);
+
+    // Smooth heavy scroll on anchor navigation
+    const handleAnchorClick = (e: MouseEvent) => {
+      const target = (e.target as HTMLElement).closest('a[href^="#"]');
+      if (!target) return;
+      const href = target.getAttribute('href');
+      if (!href || href === '#' || href === '#!') return;
+      const element = document.querySelector(href);
+      if (element) {
+        e.preventDefault();
+        lenis.scrollTo(element as HTMLElement, { offset: -24, duration: 1.8 });
+      }
+    };
+    document.addEventListener('click', handleAnchorClick);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      document.removeEventListener('click', handleAnchorClick);
+      lenis.destroy();
+    };
+  }, [viewMode, isLoading]);
 
   useEffect(() => {
     const resolveView = (): 'website' | 'projects' | 'team' | 'admin' => {
